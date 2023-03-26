@@ -36,13 +36,20 @@ CORS(app)
 # Sample search, the LIKE operator in this case is hard-coded, 
 # but if you decide to use SQLAlchemy ORM framework, 
 # there's a much better and cleaner way to do this
-def sql_search(input_text):
-    query_sql = f"""SELECT DISTINCT hotel_name, average_score FROM reviews WHERE 
-                    LOWER( Hotel_Address ) LIKE '%%{input_text.lower()}%%'
-                    OR LOWER( Hotel_Name ) LIKE '%%{input_text.lower()}%%'
-                    ORDER BY average_score DESC
+def sql_search(input):
+    input_attributes = input.split(",")
+    input_attributes = list(map(lambda x: x.strip(),input_attributes))
+    like_text = []
+    for attr in input_attributes:
+        like_text.append(f" LOWER( Positive_Review ) LIKE '%%{attr.lower()}%% '")
+    
+    like_text_full = " AND ".join(like_text)
+
+    query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews WHERE 
+                    {like_text_full}
+                    GROUP BY Hotel_Name
                     limit 10"""
-    keys = ["Hotel_Name","Average_Score"]
+    keys = ["Hotel_Name","Positive_Review"]
     data = mysql_engine.query_selector(query_sql)
     return json.dumps([dict(zip(keys,i)) for i in data])
 

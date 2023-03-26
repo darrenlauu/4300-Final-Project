@@ -2,6 +2,8 @@ env/*
 .DS_Store
 Docker/__pycache__
 
+.envrc
+
 venv/
 
 *.pyc

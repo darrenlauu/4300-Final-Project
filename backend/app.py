@@ -12,14 +12,19 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
 # Don't worry about the deployment credentials, those are fixed
 # You can use a different DB name if you want to
 MYSQL_USER = "root"
-MYSQL_USER_PASSWORD = None
+MYSQL_USER_PASSWORD = os.environ.get("MYSQL_ROOT_PASSWORD")
 MYSQL_PORT = 3306
 MYSQL_DATABASE = "hotelreviewsdb"
 
 mysql_engine = MySQLDatabaseHandler(MYSQL_USER,MYSQL_USER_PASSWORD,MYSQL_PORT,MYSQL_DATABASE)
 
 # Path to init.sql file. This file can be replaced with your own file for testing on localhost, but do NOT move the init.sql file
-mysql_engine.load_file_into_db()
+
+# This is a check to see if the DB is empty, if it is, then we load the reviews.sql file
+review_count = mysql_engine.query_selector("select count(*) from reviews")
+if sum([c for c in review_count][0]) == 0:
+    print("Loading Hotel Reviews entries for the first time")
+    mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews.sql'))
 
 app = Flask(__name__)
 CORS(app)

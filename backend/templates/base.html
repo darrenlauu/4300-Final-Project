@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-  rel="stylesheet"
-/>
+<head>
+  <title>{% block title %}{% endblock %} - Flaskr</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Unicons CDN Link for Icons -->
+  <link
+    rel="stylesheet"
+    href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css"
+  />
+</head>
 <body>
   <div class="full-body-container">
     <div class="top-text">
@@ -58,7 +65,6 @@
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           data.forEach((row) => {
             let tempDiv = document.createElement("div");
             tempDiv.innerHTML = answerBoxTemplate(
@@ -76,7 +82,10 @@
         addTag(e);
         filterText();
       } else if (e.key === "Backspace" || e.key === "Delete") {
-        console.log("del");
+        if (tags.length > 0) {
+          tags.pop();
+          createTag();
+        }
       }
     }
 

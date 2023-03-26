@@ -91,6 +91,12 @@
 }
 
 /* from https://www.codingnepalweb.com/tags-input-box-html-javascript/ */
+
+::selection {
+  color: #fff;
+  background: #5372f0;
+}
+
 .wrapper {
   width: 496px;
   background: #fff;

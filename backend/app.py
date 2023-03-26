@@ -39,7 +39,7 @@ CORS(app)
 # but if you decide to use SQLAlchemy ORM framework, 
 # there's a much better and cleaner way to do this
 def sql_search(input):
-    input_attributes = input.split(",")
+    input_attributes = input.split(" ")
     input_attributes = list(map(lambda x: x.strip(),input_attributes))
     like_text = []
     for attr in input_attributes:

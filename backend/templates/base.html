@@ -77,21 +77,25 @@
     }
   </script>
   <script>
+    // from https://www.codingnepalweb.com/tags-input-box-html-javascript/
+    const ul = document.querySelector("ul"),
+      input = document.getElementById("filter-text-val");
     function findTagsAndFilter(e) {
       if (e.key == "," || e.key == " ") {
         addTag(e);
         filterText();
-      } else if (e.key === "Backspace" || e.key === "Delete") {
+      } else if (
+        (e.key === "Backspace" || e.key === "Delete") &&
+        input.value == ""
+      ) {
         if (tags.length > 0) {
           tags.pop();
           createTag();
+          filterText();
         }
       }
     }
 
-    // from https://www.codingnepalweb.com/tags-input-box-html-javascript/
-    const ul = document.querySelector("ul"),
-      input = document.getElementById("filter-text-val");
     tags = [];
     createTag();
     function createTag() {
@@ -100,7 +104,7 @@
         .slice()
         .reverse()
         .forEach((tag) => {
-          let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}')"></i></li>`;
+          let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}'); filterText();"></i></li>`;
           ul.insertAdjacentHTML("afterbegin", liTag);
         });
     }

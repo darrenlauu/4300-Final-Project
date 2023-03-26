@@ -19,8 +19,9 @@ MYSQL_DATABASE = "hotelreviewsdb"
 mysql_engine = MySQLDatabaseHandler(MYSQL_USER,MYSQL_USER_PASSWORD,MYSQL_PORT,MYSQL_DATABASE)
 
 # Path to init.sql file. This file can be replaced with your own file for testing on localhost, but do NOT move the init.sql file
+mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews_init.sql'))
 
-# This is a check to see if the DB is empty, if it is, then we load the reviews.sql file
+# This is a check to see if the DB is empty, if it is, then we load all the reviews
 review_count = mysql_engine.query_selector("select count(*) from reviews")
 if sum([c for c in review_count][0]) == 0:
     print("Loading Hotel Reviews entries for the first time")

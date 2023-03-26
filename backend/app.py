@@ -21,7 +21,7 @@ mysql_engine = MySQLDatabaseHandler(MYSQL_USER,MYSQL_USER_PASSWORD,MYSQL_PORT,MY
 mysql_engine.query_executor("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));")
 
 # Path to init.sql file. This file can be replaced with your own file for testing on localhost, but do NOT move the init.sql file
-mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews_init.sql'))
+mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'init.sql'))
 
 # This is a check to see if the DB is empty, if it is, then we load all the reviews
 review_count = mysql_engine.query_selector("select count(*) from reviews")
@@ -30,7 +30,7 @@ if sum([c for c in review_count][0]) == 0:
     mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews.sql'))
 else:
     print("Hotel Reviews entries already exist")
-    mysql_engine.query_executor(f"USE {MYSQL_DATABASE}")
+    mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
 app = Flask(__name__)
 CORS(app)

@@ -54,4 +54,5 @@ def episodes_search():
     text = request.args.get("title")
     return sql_search(text)
 
-app.run(debug=True)
+if not mysql_engine.IS_DOCKER:
+    app.run(debug=True)

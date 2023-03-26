@@ -19,7 +19,7 @@
         <h1 id="google-0-2">Z</h1>
       </div>
       <div class="content" onclick="sendFocus()">
-        <ul>
+        <ul id="entered-tags">
           <input
             placeholder="Search for a hotel 🏨"
             id="filter-text-val"
@@ -54,7 +54,7 @@
       fetch(
         "/episodes?" +
           new URLSearchParams({
-            title: document.getElementById("filter-text-val").value,
+            title: tags.join("+"),
           }).toString()
       )
         .then((response) => response.json())

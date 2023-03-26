@@ -38,8 +38,8 @@ class MySQLDatabaseHandler(object):
         return data
 
     def load_file_into_db(self,file_path  = None):
-        if self.IS_DOCKER:
-            return
+        # if self.IS_DOCKER:
+        #     return
         if file_path is None:
             file_path = os.path.join(os.environ['ROOT_PATH'],'init.sql')
         sql_file = open(file_path,"r")

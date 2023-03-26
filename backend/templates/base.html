@@ -50,15 +50,15 @@
 
     function filterText() {
       document.getElementById("answer-box").innerHTML = "";
-      console.log(document.getElementById("filter-text-val").value);
       fetch(
         "/episodes?" +
           new URLSearchParams({
-            title: tags.join("+"),
+            title: tags.join(" "),
           }).toString()
       )
         .then((response) => response.json())
-        .then((data) =>
+        .then((data) => {
+          console.log(data);
           data.forEach((row) => {
             let tempDiv = document.createElement("div");
             tempDiv.innerHTML = answerBoxTemplate(
@@ -66,8 +66,8 @@
               row.Positive_Review
             );
             document.getElementById("answer-box").appendChild(tempDiv);
-          })
-        );
+          });
+        });
     }
   </script>
   <script>
@@ -75,6 +75,8 @@
       if (e.key == "," || e.key == " ") {
         addTag(e);
         filterText();
+      } else if (e.key === "Backspace" || e.key === "Delete") {
+        console.log("del");
       }
     }
 

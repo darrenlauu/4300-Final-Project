@@ -25,6 +25,9 @@ review_count = mysql_engine.query_selector("select count(*) from reviews")
 if sum([c for c in review_count][0]) == 0:
     print("Loading Hotel Reviews entries for the first time")
     mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews.sql'))
+else:
+    print("Hotel Reviews entries already exist")
+    mysql_engine.query_executor(f"USE {MYSQL_DATABASE}")
 
 app = Flask(__name__)
 CORS(app)

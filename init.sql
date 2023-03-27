@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS hotelreviewsdb;
+CREATE DATABASE IF NOT EXISTS kardashiandb;
 
-USE hotelreviewsdb;
+USE kardashiandb;
 
 CREATE TABLE IF NOT EXISTS `reviews`(
 `Hotel_Address` TEXT, `Average_Score` TEXT,

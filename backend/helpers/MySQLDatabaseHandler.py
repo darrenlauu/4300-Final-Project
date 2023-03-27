@@ -16,8 +16,8 @@ class MySQLDatabaseHandler(object):
 
         engine = db.create_engine(f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_USER_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}")
         conn = engine.connect()
-        conn.execute(f"CREATE DATABASE IF NOT EXISTS {self.MYSQL_DATABASE};")
-        conn.execute(f"USE {self.MYSQL_DATABASE};")
+        conn.execute(f"CREATE DATABASE IF NOT EXISTS {self.MYSQL_DATABASE}")
+        conn.execute(f"USE {self.MYSQL_DATABASE}")
         return engine
 
     def lease_connection(self):
@@ -38,12 +38,11 @@ class MySQLDatabaseHandler(object):
         return data
 
     def load_file_into_db(self,file_path  = None):
-        # if self.IS_DOCKER:
-        #     return
+        if self.IS_DOCKER:
+            return
         if file_path is None:
             file_path = os.path.join(os.environ['ROOT_PATH'],'init.sql')
         sql_file = open(file_path,"r")
         sql_file_data = list(filter(lambda x:x != '',sql_file.read().split(";\n")))
         self.query_executor(sql_file_data)
         sql_file.close()
-

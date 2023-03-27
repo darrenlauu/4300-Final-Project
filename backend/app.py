@@ -18,6 +18,16 @@ MYSQL_DATABASE = "kardashiandb"
 
 mysql_engine = MySQLDatabaseHandler(MYSQL_USER,MYSQL_USER_PASSWORD,MYSQL_PORT,MYSQL_DATABASE)
 
+mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
+
+mysql_engine.query_executor("""
+CREATE TABLE IF NOT EXISTS `reviews`(
+`Hotel_Address` TEXT, `Average_Score` TEXT,
+ `Hotel_Name` TEXT, `Negative_Review` TEXT, `Review_Total_Negative_Word_Counts` TEXT,
+ `Total_Number_of_Reviews` TEXT, `Positive_Review` TEXT, `Review_Total_Positive_Word_Counts` TEXT, `Reviewer_Score` TEXT);
+""")
+
+# This is a fix for the ONLY_FULL_GROUP_BY error
 mysql_engine.query_executor("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));")
 
 # Path to init.sql file. This file can be replaced with your own file for testing on localhost, but do NOT move the init.sql file
@@ -29,7 +39,6 @@ if sum([c for c in review_count][0]) == 0:
     mysql_engine.load_file_into_db()
 else:
     print("TVIBESLOG: Hotel Reviews entries already exist")
-    mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
 app = Flask(__name__)
 CORS(app)

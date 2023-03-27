@@ -24,13 +24,14 @@ mysql_engine.query_executor("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONL
 mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'init.sql'))
 
 # This is a check to see if the DB is empty, if it is, then we load all the reviews
-review_count = mysql_engine.query_selector("select count(*) from reviews")
-if sum([c for c in review_count][0]) == 0:
-    print("Loading Hotel Reviews entries for the first time")
-    mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews.sql'))
-else:
-    print("Hotel Reviews entries already exist")
-    mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
+# Commenting this out to try to deploy
+# review_count = mysql_engine.query_selector("select count(*) from reviews")
+# if sum([c for c in review_count][0]) == 0:
+#     print("Loading Hotel Reviews entries for the first time")
+#     mysql_engine.load_file_into_db(os.path.join(os.environ['ROOT_PATH'],'reviews.sql'))
+# else:
+#     print("Hotel Reviews entries already exist")
+#     mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
 app = Flask(__name__)
 CORS(app)
@@ -64,5 +65,5 @@ def episodes_search():
     text = request.args.get("title")
     return sql_search(text)
 
-if not mysql_engine.IS_DOCKER:
-    app.run(debug=True)
+# if not mysql_engine.IS_DOCKER:
+#     app.run(debug=True)

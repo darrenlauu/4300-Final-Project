@@ -46,8 +46,15 @@ CORS(app)
 # Sample search, the LIKE operator in this case is hard-coded, 
 # but if you decide to use SQLAlchemy ORM framework, 
 # there's a much better and cleaner way to do this
-def sql_search(input):
-    input_attributes = input.split(" ")
+def sql_search(input_search):
+    if input_search == "*":
+        # Get first 20 reviews
+        query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews limit 20"""
+        keys = ["Hotel_Name","Positive_Review"]
+        data = mysql_engine.query_selector(query_sql)
+        return json.dumps([dict(zip(keys,i)) for i in data])
+
+    input_attributes = input_search.split(" ")
     input_attributes = list(map(lambda x: x.strip(),input_attributes))
     like_text = []
     for attr in input_attributes:

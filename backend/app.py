@@ -27,9 +27,6 @@ CREATE TABLE IF NOT EXISTS `reviews`(
  `Total_Number_of_Reviews` TEXT, `Positive_Review` TEXT, `Review_Total_Positive_Word_Counts` TEXT, `Reviewer_Score` TEXT);
 """)
 
-# This is a fix for the ONLY_FULL_GROUP_BY error
-mysql_engine.query_executor("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));")
-
 # Path to init.sql file. This file can be replaced with your own file for testing on localhost, but do NOT move the init.sql file
 
 # This is a check to see if the DB is empty, if it is, then we load all the reviews
@@ -58,8 +55,7 @@ def sql_search(input):
 
     query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews WHERE 
                     {like_text_full}
-                    GROUP BY hotel_name
-                    limit 10"""
+                    limit 20"""
     keys = ["Hotel_Name","Positive_Review"]
     data = mysql_engine.query_selector(query_sql)
     return json.dumps([dict(zip(keys,i)) for i in data])

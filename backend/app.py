@@ -39,6 +39,7 @@ if sum([c for c in review_count][0]) == 0:
     mysql_engine.load_file_into_db()
 else:
     print("TVIBESLOG: Hotel Reviews entries already exist")
+    mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
 app = Flask(__name__)
 CORS(app)

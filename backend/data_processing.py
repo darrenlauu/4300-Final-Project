@@ -7,3 +7,9 @@ def create_td():
 
 def create_query_vec():
     pass
+
+def hotel_name_to_index():
+    pass
+
+def hotel_index_to_name():
+    pass

@@ -1,6 +1,14 @@
 import numpy as np
+from collections import defaultdict
 
-#this function comes from assignment a5
+# the relevant dict which maps queries to their relevant documents
+relevant = defaultdict(set)
+# the irrelevant dict which maps queries to their irrelevant documents
+irrelevant = defaultdict(set)
+
+# this function comes from assignment a5
+
+
 def rocchio(query, relevant, irrelevant, input_doc_matrix,
             movie_name_to_index, a=.3, b=.3, c=.8, clip=True):
     """Returns a vector representing the modified query vector. 
@@ -38,3 +46,35 @@ def rocchio(query, relevant, irrelevant, input_doc_matrix,
     q1 = (a * q0) + (b * avg_rel) - (c * avg_irel)
     q1[q1 < 0] = 0
     return q1
+
+
+'''{query_to_key query} takes a query stores as a numpy array and converts it
+to a tuple so it can be used as a key in a python dict. This conversion will 
+fit the following form: [0,1,0,2] -> (0,1,0,2)
+'''
+
+
+def query_to_key(query: np.ndarray) -> tuple:
+    return tuple(query)
+
+
+'''
+{mark_relevant query hotel} marks a hotel as relevant to a query
+by updating the relevance dict.
+'''
+
+
+def mark_relevant(query: np.ndarray, hotel) -> None:
+    key = query_to_key(query)
+    relevant[key].add(hotel)
+
+
+'''
+{mark_not_relevant query hotel} marks a hotel as irrelevant to a query
+by updating the irrelevance dict.
+'''
+
+
+def mark_not_relevant(query: np.ndarray, hotel) -> None:
+    key = query_to_key(query)
+    irrelevant[key].add(hotel)

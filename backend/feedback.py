@@ -2,15 +2,15 @@ import numpy as np
 from collections import defaultdict
 
 # the relevant dict which maps queries to their relevant documents
-relevant = defaultdict(set)
+relevant_set = defaultdict(set)
 # the irrelevant dict which maps queries to their irrelevant documents
-irrelevant = defaultdict(set)
+irrelevant_set = defaultdict(set)
 
 # this function comes from assignment a5
 
 
-def rocchio(query, relevant, irrelevant, input_doc_matrix,
-            movie_name_to_index, a=.3, b=.3, c=.8, clip=True):
+def rocchio(query, input_doc_matrix,
+            hotel_name_to_index, a=.3, b=.3, c=.8, clip=True):
     """Returns a vector representing the modified query vector. 
 
     Note: 
@@ -20,8 +20,6 @@ def rocchio(query, relevant, irrelevant, input_doc_matrix,
         Also, be sure to handle the cases where relevant and irrelevant are empty lists.
 
     Params: {query: String (the name of the movie being queried for),
-             relevant: List (the names of relevant movies for query),
-             irrelevant: List (the names of irrelevant movies for query),
              input_doc_matrix: Numpy Array,
              movie_name_to_index: Dict,
              a,b,c: floats (weighting of the original query, relevant queries,
@@ -29,18 +27,20 @@ def rocchio(query, relevant, irrelevant, input_doc_matrix,
              clip: Boolean (whether or not to clip all returned negative values to 0)}
     Returns: Numpy Array 
     """
+    relevant = relevant_set[query_to_key(query)]
+    irrelevant = irrelevant_set[query_to_key(query)]
     # get query vector corresponding to movie title
-    q0 = input_doc_matrix[movie_name_to_index[query], :]
+    q0 = input_doc_matrix[hotel_name_to_index[query], :]
     # get average relevant document vector
     avg_rel = np.zeros(input_doc_matrix.shape[1])
     for n in relevant:
-        avg_rel += input_doc_matrix[movie_name_to_index[n], :]
+        avg_rel += input_doc_matrix[hotel_name_to_index[n], :]
     if len(relevant) > 0:
         avg_rel /= len(relevant)
     # get average irrelevant document vector
     avg_irel = np.zeros(input_doc_matrix.shape[1])
     for n in irrelevant:
-        avg_irel += input_doc_matrix[movie_name_to_index[n], :]
+        avg_irel += input_doc_matrix[hotel_name_to_index[n], :]
     if len(irrelevant) > 0:
         avg_irel /= len(irrelevant)
     q1 = (a * q0) + (b * avg_rel) - (c * avg_irel)
@@ -66,7 +66,7 @@ by updating the relevance dict.
 
 def mark_relevant(query: np.ndarray, hotel) -> None:
     key = query_to_key(query)
-    relevant[key].add(hotel)
+    relevant_set[key].add(hotel)
 
 
 '''
@@ -77,4 +77,5 @@ by updating the irrelevance dict.
 
 def mark_not_relevant(query: np.ndarray, hotel) -> None:
     key = query_to_key(query)
-    irrelevant[key].add(hotel)
+    irrelevant_set[key].add(hotel)
+ 

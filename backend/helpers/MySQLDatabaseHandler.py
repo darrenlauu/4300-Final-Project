@@ -25,17 +25,20 @@ class MySQLDatabaseHandler(object):
     
     def query_executor(self,query):
         conn = self.lease_connection()
+        conn.execute(f"USE {self.MYSQL_DATABASE}")
         if type(query) == list:
             for i in query:
                 conn.execute(i)
         else:
             conn.execute(query)
+        conn.close()
         
 
     def query_selector(self,query):
         conn = self.lease_connection()
         conn.execute(f"USE {self.MYSQL_DATABASE}")
         data = conn.execute(query)
+        conn.close()
         return data
 
     def load_file_into_db(self,file_path  = None):

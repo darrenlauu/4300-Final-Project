@@ -50,6 +50,10 @@ def sql_search(input_search, countries):
     input_attributes = input_search.split(" ")
     countries_list = countries.split(",")
     input_attributes = list(map(lambda x: x.strip(),input_attributes))
+
+    query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews WHERE """
+
+
     like_text = []
     for attr in input_attributes:
         like_text.append(f" LOWER( Positive_Review ) LIKE '%%{attr.lower()}%% '")

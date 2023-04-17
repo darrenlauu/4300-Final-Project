@@ -9,8 +9,8 @@ irrelevant_set = defaultdict(set)
 # this function comes from assignment a5
 
 
-def rocchio(query, input_doc_matrix,
-            hotel_name_to_index, a=.3, b=.3, c=.8, clip=True):
+def rocchio(query: np.ndarray, input_doc_matrix: np.ndarray,
+            hotel_name_to_index: dict, a: float = .3, b: float = .3, c: float = .8, clip: bool = True) -> np.ndarray:
     """Returns a vector representing the modified query vector. 
 
     Note: 
@@ -78,4 +78,3 @@ by updating the irrelevance dict.
 def mark_not_relevant(query: np.ndarray, hotel) -> None:
     key = query_to_key(query)
     irrelevant_set[key].add(hotel)
- 

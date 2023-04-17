@@ -1,3 +1,18 @@
+body {
+  background-color: #04316d;
+  font-family: "Open Sans", sans-serif;
+  color: #ffffff;
+}
+
+.select-countries {
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+#filter-text-val {
+  min-width: 500px;
+}
+
 .full-body-container {
   position: absolute;
   top: 0;
@@ -156,6 +171,8 @@
   border: none;
   outline: none;
   font-size: 16px;
+  background-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
 }
 .wrapper .details {
   justify-content: space-between;

@@ -17,32 +17,114 @@
 <body>
   <div class="full-body-container">
     <div class="top-text">
-      <div class="google-colors">
-        <h1 id="google-c">T</h1>
-        <h1 id="google-s">V</h1>
-        <h1 id="google-4">I</h1>
-        <h1 id="google-3">B</h1>
-        <h1 id="google-0-1">E</h1>
-        <h1 id="google-0-2">Z</h1>
-      </div>
+      <img src="{{ url_for('static', filename='images/logo.png') }}" />
       <div class="content" onclick="sendFocus()">
         <ul id="entered-tags">
           <input
-            placeholder="Search for a hotel 🏨"
+            placeholder="What's your vibe? 🏨 (comma-separated)"
             id="filter-text-val"
             autocomplete="off"
             type="text"
             spellcheck="false"
           />
         </ul>
-      </div>
-      <div class="details">
-        <button>Clear</button>
+        <div class="select-countries">
+          <h4>Countries:</h4>
+          <label>
+            <input
+              type="checkbox"
+              id="select-all-btn"
+              name="countries[]"
+              value="Select All"
+              checked
+            />
+            (Select All) </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="Austria"
+              checked
+            />
+            Austria </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="Spain"
+              checked
+            />
+            Spain </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="Netherlands"
+              checked
+            />
+            Netherlands </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="Italy"
+              checked
+            />
+            Italy </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="United Kingdom"
+              checked
+            />
+            United Kingdom </label
+          ><br />
+          <label>
+            <input
+              type="checkbox"
+              class="country-checkbox"
+              name="countries[]"
+              value="France"
+              checked
+            />
+            France </label
+          ><br />
+        </div>
       </div>
     </div>
     <div id="answer-box"></div>
   </div>
+  <script>
+    const selectAllBtn = document.getElementById("select-all-btn");
+    const countryCheckboxes = document.querySelectorAll(".country-checkbox");
 
+    selectAllBtn.addEventListener("change", () => {
+      const checked = selectAllBtn.checked;
+      for (const checkbox of countryCheckboxes) {
+        checkbox.checked = checked;
+      }
+      filterText();
+    });
+
+    for (const checkbox of countryCheckboxes) {
+      checkbox.addEventListener("change", () => {
+        const allSelected = [...countryCheckboxes].every((cb) => cb.checked);
+        selectAllBtn.checked = allSelected;
+        filterText();
+      });
+    }
+  </script>
   <script>
     function answerBoxTemplate(title, titleDesc) {
       return `<div class=''>
@@ -57,10 +139,20 @@
 
     function filterText() {
       document.getElementById("answer-box").innerHTML = "";
+      const selectedCountryCheckboxes = document.querySelectorAll(
+        ".country-checkbox:checked"
+      );
+      // get a list of all checkbox values
+      const countryValues = Array.from(selectedCountryCheckboxes).map(
+        (checkbox) => checkbox.value
+      );
+      // join values by comma into string
+      const countryString = countryValues.join(",");
       fetch(
         "/episodes?" +
           new URLSearchParams({
             title: tags.join(" "),
+            countries: countryString,
           }).toString()
       )
         .then((response) => response.json())
@@ -73,6 +165,15 @@
             );
             document.getElementById("answer-box").appendChild(tempDiv);
           });
+          // if no results, display message
+          if (data.length == 0) {
+            let tempDiv = document.createElement("div");
+            tempDiv.innerHTML = answerBoxTemplate(
+              "No results found",
+              "Try a different search"
+            );
+            document.getElementById("answer-box").appendChild(tempDiv);
+          }
         });
     }
   </script>
@@ -81,7 +182,7 @@
     const ul = document.querySelector("ul"),
       input = document.getElementById("filter-text-val");
     function findTagsAndFilter(e) {
-      if (e.key == "," || e.key == " ") {
+      if (e.key == ",") {
         addTag(e);
         filterText();
       } else if (
@@ -117,9 +218,6 @@
       let tag = e.target.value.replace(/\s+/g, " ");
       if (tag.length > 1 && !tags.includes(tag)) {
         let tags_split = tag.split(",");
-        if (tags_split.length == 1) {
-          tags_split = tag.split(" ");
-        }
         if (tags_split.length > 0) {
           tags.push(tags_split[0]);
           createTag();
@@ -128,10 +226,5 @@
       e.target.value = "";
     }
     input.addEventListener("keyup", findTagsAndFilter);
-    const removeBtn = document.querySelector(".details button");
-    removeBtn.addEventListener("click", () => {
-      tags.length = 0;
-      ul.querySelectorAll("li").forEach((li) => li.remove());
-    });
   </script>
 </body>

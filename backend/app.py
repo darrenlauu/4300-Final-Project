@@ -18,7 +18,7 @@ MYSQL_DATABASE = "kardashiandb"
 
 mysql_engine = MySQLDatabaseHandler(MYSQL_USER,MYSQL_USER_PASSWORD,MYSQL_PORT,MYSQL_DATABASE)
 
-mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
+# mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
 mysql_engine.query_executor("""
 CREATE TABLE IF NOT EXISTS `reviews`(
@@ -46,21 +46,17 @@ CORS(app)
 # Sample search, the LIKE operator in this case is hard-coded, 
 # but if you decide to use SQLAlchemy ORM framework, 
 # there's a much better and cleaner way to do this
-def sql_search(input_search):
-    if input_search == "*":
-        # Get first 20 reviews
-        query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews limit 20"""
-        keys = ["Hotel_Name","Positive_Review"]
-        data = mysql_engine.query_selector(query_sql)
-        return json.dumps([dict(zip(keys,i)) for i in data])
-
+def sql_search(input_search, countries):
     input_attributes = input_search.split(" ")
+    countries_list = countries.split(",")
     input_attributes = list(map(lambda x: x.strip(),input_attributes))
     like_text = []
     for attr in input_attributes:
         like_text.append(f" LOWER( Positive_Review ) LIKE '%%{attr.lower()}%% '")
     
     like_text_full = " AND ".join(like_text)
+
+    like_text_full += " AND country IN (" + ",".join([f"'{c}'" for c in countries_list]) + ")"
 
     query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews WHERE 
                     {like_text_full}
@@ -76,7 +72,8 @@ def home():
 @app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
-    return sql_search(text)
+    countries = request.args.get("countries")
+    return sql_search(text, countries)
 
 if not mysql_engine.IS_DOCKER:
     app.run(debug=True)

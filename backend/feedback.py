@@ -30,7 +30,7 @@ def rocchio(query: np.ndarray, input_doc_matrix: np.ndarray,
     relevant = relevant_set[query_to_key(query)]
     irrelevant = irrelevant_set[query_to_key(query)]
     # get query vector corresponding to movie title
-    q0 = input_doc_matrix[hotel_name_to_index[query], :]
+    q0 = query
     # get average relevant document vector
     avg_rel = np.zeros(input_doc_matrix.shape[1])
     for n in relevant:
@@ -64,9 +64,9 @@ by updating the relevance dict.
 '''
 
 
-def mark_relevant(query: np.ndarray, hotel) -> None:
+def mark_relevant(query: np.ndarray, hotelInd: int) -> None:
     key = query_to_key(query)
-    relevant_set[key].add(hotel)
+    relevant_set[key].add(hotelInd)
 
 
 '''
@@ -75,6 +75,6 @@ by updating the irrelevance dict.
 '''
 
 
-def mark_not_relevant(query: np.ndarray, hotel) -> None:
+def mark_not_relevant(query: np.ndarray, hotelInd: int) -> None:
     key = query_to_key(query)
-    irrelevant_set[key].add(hotel)
+    irrelevant_set[key].add(hotelInd)

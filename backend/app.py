@@ -6,6 +6,7 @@ from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import numpy as np
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
+import feedback
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -15,7 +16,7 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..", os.curdir))
 # Don't worry about the deployment credentials, those are fixed
 # You can use a different DB name if you want to
 MYSQL_USER = "root"
-MYSQL_USER_PASSWORD = os.environ.get("MYSQL_ROOT_PASSWORD")
+MYSQL_USER_PASSWORD = "password"
 MYSQL_PORT = 3306
 MYSQL_DATABASE = "kardashiandb"
 
@@ -90,6 +91,7 @@ def sql_search(input_search, countries):
     data = mysql_engine.query_selector(query_sql)
     reviews = [dict(zip(keys, i)) for i in data]
     agg_hotels, id_to_hotel = agg_reviews(reviews)
+    hotel_name_to_index = {v: k for k, v in id_to_hotel.items()}
     tfidf_vec = TfidfVectorizer(max_features=500,
                                 stop_words="english",
                                 max_df=0.1,
@@ -124,6 +126,9 @@ def sql_search(input_search, countries):
         if tkn in vocab_to_index:
             ind = vocab_to_index[tkn]
             query_vec[ind] += 1
+
+    query_vec = feedback.rocchio(query_vec, doc_by_vocab,
+                                 hotel_name_to_index)
 
     cos_score = np.zeros(len(agg_hotels))
 

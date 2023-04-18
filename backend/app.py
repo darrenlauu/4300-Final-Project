@@ -52,6 +52,28 @@ CORS(app)
 # there's a much better and cleaner way to do this
 
 
+def agg_reviews(reviews):
+    dic = {}
+    id_to_hot = {}
+    for review in reviews:
+        hotel_name, hotel_id, rev = review["Hotel_Name"], review["hotel_id"] - \
+            1, review['Positive_Review']
+        if hotel_id not in dic:
+            dic[hotel_id] = rev
+        else:
+            dic[hotel_id] += rev
+        if hotel_id not in id_to_hot:
+            id_to_hot[hotel_id] = hotel_name
+    return dic, id_to_hot
+
+
+def find_section(text, attr):
+    lst = []
+    for i in attr:
+        val = text.find(i)
+        if val >= 0:
+            lst.append(i)
+    return min(lst), max(lst)
 
 
 def sql_search(input_search, countries):
@@ -62,45 +84,50 @@ def sql_search(input_search, countries):
     # like_text_full = "country IN (" + \
     #     ",".join([f"'{c}'" for c in countries_list]) + ")"
 
-    query_sql = f"""SELECT hotel_name, Positive_Review, review_id, country FROM reviews"""
-    keys = ["Hotel_Name", "Positive_Review", "review_id", "country"]
+    query_sql = f"""SELECT hotel_name, Positive_Review, review_id, country, hotel_id FROM reviews"""
+    keys = ["Hotel_Name", "Positive_Review",
+            "review_id", "country", "hotel_id"]
     data = mysql_engine.query_selector(query_sql)
     reviews = [dict(zip(keys, i)) for i in data]
-    if os.path.exists("tfidf-doc.p"):
-        doc_by_vocab = pickle.load(open("tfidf-doc.p", 'rb'))
-        index_to_vocab = pickle.load(open("index_to_vocab.p", 'rb'))
-        vocab_to_index = pickle.load(open("vocab_to_index.p", 'rb'))
-    else:
-        tfidf_vec = TfidfVectorizer(max_features=500,
-                                    stop_words="english",
-                                    max_df=0.1,
-                                    min_df=10,
-                                    norm='l2')
-        doc_by_vocab = tfidf_vec.fit_transform(
-            [d['Positive_Review'] for d in reviews]).toarray()
-        
-        pickle.dump(doc_by_vocab, open("doc_by_vocab.p", 'wb'))
-        pickle.dump(tfidf_vec, open("tfidf_vec.p", 'wb'))
-        
-    
-        index_to_vocab = {i: v for i, v in enumerate(
-            tfidf_vec.get_feature_names_out())}
-        pickle.dump(index_to_vocab, open("index_to_vocab.p", 'wb'))
-        vocab_to_index = {v: i for i, v in enumerate(
-            tfidf_vec.get_feature_names_out())}
-        pickle.dump(vocab_to_index, open("vocab_to_index.p", 'wb'))
-    print(doc_by_vocab.shape)
-    print(type(doc_by_vocab))
-    print(doc_by_vocab[0])
+    agg_hotels, id_to_hotel = agg_reviews(reviews)
+    tfidf_vec = TfidfVectorizer(max_features=500,
+                                stop_words="english",
+                                max_df=0.1,
+                                min_df=10,
+                                norm='l2')
+    doc_by_vocab = tfidf_vec.fit_transform(
+        agg_hotels[d] for d in agg_hotels).toarray()
+    # if os.path.exists("tfidf-doc.p"):
+    #     doc_by_vocab = pickle.load(open("tfidf-doc.p", 'rb'))
+    #     index_to_vocab = pickle.load(open("index_to_vocab.p", 'rb'))
+    #     vocab_to_index = pickle.load(open("vocab_to_index.p", 'rb'))
+    # else:
+    #     tfidf_vec = TfidfVectorizer(max_features=500,
+    #                                 stop_words="english",
+    #                                 max_df=0.1,
+    #                                 min_df=10,
+    #                                 norm='l2')
+    #     doc_by_vocab = tfidf_vec.fit_transform(
+    #         [d['Positive_Review'] for d in reviews]).toarray()
+
+    #     pickle.dump(doc_by_vocab, open("doc_by_vocab.p", 'wb'))
+    #     pickle.dump(tfidf_vec, open("tfidf_vec.p", 'wb'))
+
+    index_to_vocab = {i: v for i, v in enumerate(
+        tfidf_vec.get_feature_names_out())}
+    pickle.dump(index_to_vocab, open("index_to_vocab.p", 'wb'))
+    vocab_to_index = {v: i for i, v in enumerate(
+        tfidf_vec.get_feature_names_out())}
+    pickle.dump(vocab_to_index, open("vocab_to_index.p", 'wb'))
     query_vec = np.zeros(len(index_to_vocab))
     for tkn in input_attributes:
         if tkn in vocab_to_index:
             ind = vocab_to_index[tkn]
             query_vec[ind] += 1
 
-    cos_score = np.zeros(len(reviews))
+    cos_score = np.zeros(len(agg_hotels))
 
-    for i in range(len(reviews)):
+    for i in range(len(agg_hotels)):
         q_norm = np.linalg.norm(query_vec)
         d_norm = np.linalg.norm(doc_by_vocab[i])
         if q_norm == 0 or d_norm == 0:
@@ -111,19 +138,40 @@ def sql_search(input_search, countries):
 
     # ans = np.argmax(cos_score)
     # print(processed[ans][1], processed[ans][2])
-    top10 = list(np.flip(np.argsort(cos_score))[:10])
+    topvals = list(np.flip(np.argsort(cos_score))[:50])
     ret_keys = ["Hotel_Name", "Positive_Review"]
-    ans = [(reviews[i]['Hotel_Name'], reviews[i]["Positive_Review"])
-           for i in top10]
-    return json.dumps([dict(zip(ret_keys, i)) for i in ans])
+    agg_keys = (list(agg_hotels.keys()))
+
+    ans = []
+    for i in topvals:
+        ans_hotel_name = id_to_hotel[agg_keys[i]]
+        ans_review = agg_hotels[i]
+        ans_text = "..."
+        for i in input_attributes:
+            ind = ans_review.find(i)
+            start = ans_review.find(" ", ind-40, ind)
+            end = ans_review.find(
+                " ", min(len(ans_review), ind+40), len(ans_review))
+            ans_text += ans_review[start:end]
+            ans_text += "..."
+        boolsearch = True
+        for i in input_attributes:
+            if i not in ans_review:
+                boolsearch = False
+        if boolsearch == True:
+            ans.append((ans_hotel_name, ans_text))
+
+    # ans = [(, "..." + agg_hotels[i][find_section(agg_hotels[i], input_attributes)[0]:find_section(agg_hotels[i], input_attributes)[1]]+"...")
+    #        for i in top10]
+    return json.dumps([dict(zip(ret_keys, i)) for i in ans[:10]])
 
 
-@app.route("/")
+@ app.route("/")
 def home():
     return render_template('base.html', title="sample html")
 
 
-@app.route("/episodes")
+@ app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
     countries = request.args.get("countries")

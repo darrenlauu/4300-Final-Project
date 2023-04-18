@@ -51,9 +51,10 @@ app = Flask(__name__)
 CORS(app)
 
 
-def get_10000_reviews():
-  query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews LIMIT 10000;"""
+def get_all_reviews():
+  query_sql = f"""SELECT hotel_name, Positive_Review FROM reviews;"""
   data = mysql_engine.query_selector(query_sql)
+  print(data.mappings().all()[0])
   return data.mappings().all()
 
 def build_review_matrix(reviews):
@@ -64,13 +65,14 @@ def build_review_matrix(reviews):
   frequencies. The function returns the review matrix and a list of the feature names extracted from 
   the reviews.
   """
-  vectorizer = TfidfVectorizer(stop_words='english', max_features=5000, max_df=0.05, smooth_idf=True)
+  vectorizer = TfidfVectorizer(stop_words='english', max_df=0.13, smooth_idf=True)
   review_matrix = vectorizer.fit_transform(reviews)
+  print(review_matrix.shape)
   return review_matrix, vectorizer.get_feature_names()
 
 
 def extract_topics_svd(reviews):
-  svd = TruncatedSVD(n_components=100, n_iter=10, random_state=42)
+  svd = TruncatedSVD(n_components=100, n_iter=40, random_state=42)
 
   hotel_reviews = {}
   for review in reviews:
@@ -82,6 +84,7 @@ def extract_topics_svd(reviews):
   topics_data = []
   for hotel_name, reviews in hotel_reviews.items():
     review_matrix, feature_names = build_review_matrix(reviews)
+    print(len(reviews))
     svd.fit_transform(review_matrix)
     topics = dict()
 
@@ -94,12 +97,9 @@ def extract_topics_svd(reviews):
     
     topics = sorted(topics.items(), key=lambda x: x[1], reverse=True)[:10]
     topics_data.append({'Hotel_Name': hotel_name, 'Topics': topics})
-
-  for i in range(len(topics_data)):
-    print(topics_data[i])
+  
+  print(len(topics_data))
   return topics_data
-
-
 
 
 def extract_topics_lda(reviews):
@@ -116,5 +116,16 @@ def extract_topics_lda(reviews):
   print(topics_data[0])
   return topics_data
 
-extract_topics_svd(get_10000_reviews())
+def write_topics(topics_data):
+  # alter_query = "ALTER TABLE hotels ADD COLUMN Topic_1 TEXT, ADD COLUMN Topic_2 TEXT, ADD COLUMN Topic_3 TEXT, ADD COLUMN Topic_4 TEXT, ADD COLUMN Topic_5 TEXT;"
+  # mysql_engine.query_executor(alter_query)
+  for hotel_data in topics_data:
+    hotel_name = hotel_data['Hotel_Name']
+    topics = hotel_data['Topics']
+    for _ in topics:
+      query_sql = f"UPDATE hotels SET Topic_1 = '{topics[0][0]}', Topic_2 = '{topics[1][0]}', Topic_3 = '{topics[2][0]}', Topic_4 = '{topics[3][0]}', Topic_5 = '{topics[4][0]}' WHERE Hotel_Name = '{hotel_name}'"
+      mysql_engine.query_executor(query_sql)
+
+topics_data = extract_topics_svd(get_all_reviews())
+write_topics(topics_data)
 # extract_topics_lda(get_10_reviews())

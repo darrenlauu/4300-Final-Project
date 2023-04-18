@@ -6,6 +6,7 @@ from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import numpy as np
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
+import feedback
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -127,7 +128,9 @@ def sql_search(input_search, countries):
 
     cos_score = np.zeros(len(agg_hotels))
 
-    for i in range(len(agg_hotels)):
+    query_vec = feedback.rocchio(query_vec, doc_by_vocab, dict())
+
+    for i in range(len(reviews)):
         q_norm = np.linalg.norm(query_vec)
         d_norm = np.linalg.norm(doc_by_vocab[i])
         if q_norm == 0 or d_norm == 0:

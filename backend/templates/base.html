@@ -126,10 +126,23 @@
     }
   </script>
   <script>
-    function answerBoxTemplate(title, titleDesc) {
-      return `<div class=''>
-                <h3 class='episode-title'>${title}</h3>
-                <p class='episode-desc'>${titleDesc}</p>
+    function answerBoxTemplate(
+      hotel_id,
+      title,
+      titleDesc,
+      numVotes,
+      country,
+      averageScore,
+      tags
+    ) {
+      return `<div class='review-card' data-id=${hotel_id}>
+                <h3 class='review-title'>${title}</h3>
+                Country: ${country}, Average Rating: ${averageScore}
+                <p class='tags'>Tags: ${tags.join(", ")}</p>
+                <p class='review-desc'>${titleDesc}</p>
+                <button class="upvote-button">&#9650;</button>
+                <span>0</span>
+                <button class="downvote-button">&#9660;</button>
             </div>`;
     }
 
@@ -149,7 +162,7 @@
       // join values by comma into string
       const countryString = countryValues.join(",");
       fetch(
-        "/episodes?" +
+        "/reviews?" +
           new URLSearchParams({
             title: tags.join(" "),
             countries: countryString,
@@ -160,18 +173,22 @@
           data.forEach((row) => {
             let tempDiv = document.createElement("div");
             tempDiv.innerHTML = answerBoxTemplate(
+              row.Hotel_ID,
               row.Hotel_Name,
-              row.Positive_Review
+              row.Positive_Review,
+              row.Number_Votes,
+              row.Country,
+              row.Average_Score,
+              [row.Topic_1, row.Topic_2, row.Topic_3, row.Topic_4, row.Topic_5]
             );
             document.getElementById("answer-box").appendChild(tempDiv);
           });
           // if no results, display message
           if (data.length == 0) {
             let tempDiv = document.createElement("div");
-            tempDiv.innerHTML = answerBoxTemplate(
-              "No results found",
-              "Try a different search"
-            );
+            tempDiv.innerHTML = `<div class='review-card'
+                No results found
+            </div>`;
             document.getElementById("answer-box").appendChild(tempDiv);
           }
         });

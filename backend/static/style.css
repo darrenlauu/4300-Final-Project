@@ -97,11 +97,20 @@ body {
   margin-top: 50px;
 }
 
-.episode-title {
+.review-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.06);
+  color: #000000;
+}
+
+.review-title {
   font-family: "Kanit", sans-serif;
 }
 
-.episode-desc {
+.review-desc {
   font-family: "Montserrat", sans-serif;
 }
 

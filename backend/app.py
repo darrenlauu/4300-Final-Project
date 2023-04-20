@@ -85,11 +85,16 @@ def sql_search(input_search, countries):
     # like_text_full = "country IN (" + \
     #     ",".join([f"'{c}'" for c in countries_list]) + ")"
 
-    query_sql = f"""SELECT hotel_name, Positive_Review, review_id, country, hotel_id FROM reviews"""
+    query_sql = f"""SELECT
+    H.hotel_name, Positive_Review, review_id, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
+    FROM reviews R
+    join hotels H on R.hotel_id = H.hotel_id
+    limit 10"""
     keys = ["Hotel_Name", "Positive_Review",
-            "review_id", "country", "hotel_id"]
+            "review_id", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
     data = mysql_engine.query_selector(query_sql)
     reviews = [dict(zip(keys, i)) for i in data]
+    return json.dumps(reviews)
     agg_hotels, id_to_hotel = agg_reviews(reviews)
     hotel_name_to_index = {v: k for k, v in id_to_hotel.items()}
     tfidf_vec = TfidfVectorizer(max_features=500,
@@ -177,11 +182,21 @@ def home():
     return render_template('base.html', title="sample html")
 
 
-@ app.route("/episodes")
-def episodes_search():
+@ app.route("/reviews")
+def reviews_search():
     text = request.args.get("title")
     countries = request.args.get("countries")
     return sql_search(text, countries)
+
+@ app.route("/upvote/<int:hotel_id>/", methods=["POST"])
+def upvote(hotel_id):
+    plus = request.args.get("upvote") == "true" # anything else is false
+    if plus:
+        upvote_op = "+"
+    else:
+        upvote_op = "-"
+    mysql_engine.query_executor(f"UPDATE reviews SET upvote = upvote {upvote_op} 1 WHERE hotel_id={hotel_id}")
+    return json.dumps({"success":True})
 
 
 if not mysql_engine.IS_DOCKER:

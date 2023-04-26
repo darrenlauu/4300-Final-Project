@@ -61,25 +61,25 @@ def get_reviews():
     reviews = [dict(zip(keys, i)) for i in data]
     return reviews
 
-if os.path.exists("vectorizer.p"):
-    print("TVIBESLOG: Loading TFIDF from pickle")
-    vectorizer = pickle.load(open("vectorizer.p", "rb"))
-    tfIdfMatrix = pickle.load(open("tfIdfMatrix.p", "rb"))
-else:
-    print("TVIBESLOG: Pickling TFIDF from SQL")
-    reviews = get_reviews()
-    reviews_list = [d['Positive_Review'] for d in reviews]
-    print("TVIBESLOG: Made the list of reviews")
+# if os.path.exists("vectorizer.p"):
+#     print("TVIBESLOG: Loading TFIDF from pickle")
+#     vectorizer = pickle.load(open("vectorizer.p", "rb"))
+#     tfIdfMatrix = pickle.load(open("tfIdfMatrix.p", "rb"))
+# else:
+print("TVIBESLOG: Pickling TFIDF from SQL")
+reviews = get_reviews()
+reviews_list = [d['Positive_Review'] for d in reviews]
+print("TVIBESLOG: Made the list of reviews")
 
-    vectorizer = TfidfVectorizer(max_features=500,
-                                stop_words="english",
-                                max_df=0.1,
-                                min_df=10,
-                                norm='l2')
-    tfIdfMatrix = vectorizer.fit_transform(reviews_list)
+vectorizer = TfidfVectorizer(max_features=500,
+                            stop_words="english",
+                            max_df=0.1,
+                            min_df=10,
+                            norm='l2')
+tfIdfMatrix = vectorizer.fit_transform(reviews_list)
 
-    pickle.dump(vectorizer, open("vectorizer.p", "wb"))
-    pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
+pickle.dump(vectorizer, open("vectorizer.p", "wb"))
+pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
 
     
 print("TVIBESLOG: Made the TF-IDF matrix")

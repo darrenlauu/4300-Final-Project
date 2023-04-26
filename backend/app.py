@@ -78,8 +78,8 @@ vectorizer = TfidfVectorizer(max_features=500,
                             norm='l2')
 tfIdfMatrix = vectorizer.fit_transform(reviews_list)
 
-pickle.dump(vectorizer, open("vectorizer.p", "wb"))
-pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
+# pickle.dump(vectorizer, open("vectorizer.p", "wb"))
+# pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
 
     
 print("TVIBESLOG: Made the TF-IDF matrix")

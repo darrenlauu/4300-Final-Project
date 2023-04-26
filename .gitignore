@@ -20,3 +20,6 @@ dist/
 build/
 *.egg-info/
 helpers/*
+
+vectorizer.p
+tfIdfMatrix.p

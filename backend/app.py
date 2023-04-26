@@ -6,7 +6,9 @@ from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import numpy as np
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import feedback
+import operator
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -45,6 +47,33 @@ else:
 
 mysql_engine.query_executor(f"USE {MYSQL_DATABASE};")
 
+print("TVIBESLOG: Querying reviews for cosine sim initialization")
+
+def get_reviews():
+    query_sql = f"""SELECT
+    H.hotel_name, Positive_Review, review_id, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
+    FROM reviews R
+    join hotels H on R.hotel_id = H.hotel_id
+    """
+    keys = ["Hotel_Name", "Positive_Review",
+            "review_id", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
+    data = mysql_engine.query_selector(query_sql)
+    reviews = [dict(zip(keys, i)) for i in data]
+    return reviews
+
+reviews = get_reviews()
+reviews_list = [d['Positive_Review'] for d in reviews]
+print("TVIBESLOG: Made the list of reviews")
+
+vectorizer = TfidfVectorizer()
+tfIdfMatrix = vectorizer.fit_transform(reviews_list)
+
+# pickle(vectorizer, open("vectorizer.p", "wb"))
+# pickle(tfIdfMatrix)
+
+    
+print("TVIBESLOG: Made the TF-IDF matrix")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -57,7 +86,7 @@ def agg_reviews(reviews):
     dic = {}
     id_to_hot = {}
     for review in reviews:
-        hotel_name, hotel_id, rev = review["Hotel_Name"], review["hotel_id"] - \
+        hotel_name, hotel_id, rev = review["Hotel_Name"], review["Hotel_ID"] - \
             1, review['Positive_Review']
         if hotel_id not in dic:
             dic[hotel_id] = rev
@@ -76,105 +105,23 @@ def find_section(text, attr):
             lst.append(i)
     return min(lst), max(lst)
 
-
-def sql_search(input_search, countries):
-    input_attributes = input_search.split(" ")
+def sql_search(reviews, input_search, countries):
     countries_list = countries.split(",")
-    input_attributes = list(map(lambda x: x.strip(), input_attributes))
+    countries_set = set(countries_list)
 
-    # like_text_full = "country IN (" + \
-    #     ",".join([f"'{c}'" for c in countries_list]) + ")"
+    query = vectorizer.transform([input_search])
+    similarities = cosine_similarity(query, tfIdfMatrix)
+    print("TVIBESLOG: Computed the cosine similarity")
 
-    query_sql = f"""SELECT
-    H.hotel_name, Positive_Review, review_id, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
-    FROM reviews R
-    join hotels H on R.hotel_id = H.hotel_id
-    limit 10"""
-    keys = ["Hotel_Name", "Positive_Review",
-            "review_id", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
-    data = mysql_engine.query_selector(query_sql)
-    reviews = [dict(zip(keys, i)) for i in data]
-    return json.dumps(reviews)
-    agg_hotels, id_to_hotel = agg_reviews(reviews)
-    hotel_name_to_index = {v: k for k, v in id_to_hotel.items()}
-    tfidf_vec = TfidfVectorizer(max_features=500,
-                                stop_words="english",
-                                max_df=0.1,
-                                min_df=10,
-                                norm='l2')
-    doc_by_vocab = tfidf_vec.fit_transform(
-        agg_hotels[d] for d in agg_hotels).toarray()
-    # if os.path.exists("tfidf-doc.p"):
-    #     doc_by_vocab = pickle.load(open("tfidf-doc.p", 'rb'))
-    #     index_to_vocab = pickle.load(open("index_to_vocab.p", 'rb'))
-    #     vocab_to_index = pickle.load(open("vocab_to_index.p", 'rb'))
-    # else:
-    #     tfidf_vec = TfidfVectorizer(max_features=500,
-    #                                 stop_words="english",
-    #                                 max_df=0.1,
-    #                                 min_df=10,
-    #                                 norm='l2')
-    #     doc_by_vocab = tfidf_vec.fit_transform(
-    #         [d['Positive_Review'] for d in reviews]).toarray()
+    index_to_similarities = {}
+    for i in range(len(similarities[0])):
+        index_to_similarities[i] = similarities[0][i]
+    print("TVIBESLOG: Made the index to similarity dictionary")
 
-    #     pickle.dump(doc_by_vocab, open("doc_by_vocab.p", 'wb'))
-    #     pickle.dump(tfidf_vec, open("tfidf_vec.p", 'wb'))
-
-    index_to_vocab = {i: v for i, v in enumerate(
-        tfidf_vec.get_feature_names_out())}
-    pickle.dump(index_to_vocab, open("index_to_vocab.p", 'wb'))
-    vocab_to_index = {v: i for i, v in enumerate(
-        tfidf_vec.get_feature_names_out())}
-    pickle.dump(vocab_to_index, open("vocab_to_index.p", 'wb'))
-    query_vec = np.zeros(len(index_to_vocab))
-    for tkn in input_attributes:
-        if tkn in vocab_to_index:
-            ind = vocab_to_index[tkn]
-            query_vec[ind] += 1
-
-    query_vec = feedback.rocchio(query_vec, doc_by_vocab,
-                                 hotel_name_to_index)
-
-    cos_score = np.zeros(len(agg_hotels))
-
-    for i in range(len(agg_hotels)):
-        q_norm = np.linalg.norm(query_vec)
-        d_norm = np.linalg.norm(doc_by_vocab[i])
-        if q_norm == 0 or d_norm == 0:
-            score = 0
-        else:
-            score = np.dot(doc_by_vocab[i], query_vec)/(q_norm*d_norm)
-        cos_score[i] = score
-
-    # ans = np.argmax(cos_score)
-    # print(processed[ans][1], processed[ans][2])
-    topvals = list(np.flip(np.argsort(cos_score))[:50])
-    ret_keys = ["Hotel_Name", "Positive_Review"]
-    agg_keys = (list(agg_hotels.keys()))
-
-    ans = []
-    for i in topvals:
-        ans_hotel_name = id_to_hotel[agg_keys[i]]
-        ans_review = agg_hotels[i]
-
-        ans_text = "..."
-        for i in input_attributes:
-            ind = ans_review.find(i)
-            start = ans_review.find(" ", ind-40, ind)
-            end = ans_review.find(
-                " ", min(len(ans_review), ind+40), len(ans_review))
-            ans_text += ans_review[start:end]
-            ans_text += "..."
-        boolsearch = True
-        for i in input_attributes:
-            if i not in ans_review:
-                boolsearch = False
-        if boolsearch == True:
-            ans.append((ans_hotel_name, ans_text))
-
-    # ans = [(, "..." + agg_hotels[i][find_section(agg_hotels[i], input_attributes)[0]:find_section(agg_hotels[i], input_attributes)[1]]+"...")
-    #        for i in top10]
-    return json.dumps([dict(zip(ret_keys, i)) for i in ans[:10]])
+    sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
+    result = [reviews[i] for i in sorted_indices]
+    print("TVIBESLOG: Sorted the indices and got the top 10 reviews")
+    return json.dumps(list(filter(lambda x: x["Country"] in countries_set, result))[:10])
 
 
 @ app.route("/")
@@ -186,7 +133,7 @@ def home():
 def reviews_search():
     text = request.args.get("title")
     countries = request.args.get("countries")
-    return sql_search(text, countries)
+    return sql_search(reviews, text, countries)
 
 @ app.route("/upvote/<int:hotel_id>/", methods=["POST"])
 def upvote(hotel_id):

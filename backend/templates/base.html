@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-  <title>{% block title %}{% endblock %} - Flaskr</title>
+  <title>TVibes</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -135,14 +135,15 @@
       averageScore,
       tags
     ) {
-      return `<div class='review-card' data-id=${hotel_id}>
+      return `<div class='card' data-id=${hotel_id}>
                 <h3 class='review-title'>${title}</h3>
                 Country: ${country}, Average Rating: ${averageScore}
                 <p class='tags'>Tags: ${tags.join(", ")}</p>
-                <p class='review-desc'>${titleDesc}</p>
+                <p class='review-desc'>"${titleDesc}"</p>
                 <button class="upvote-button">&#9650;</button>
                 <span>0</span>
                 <button class="downvote-button">&#9660;</button>
+                <a href="/${hotel_id}">View Hotel</a>
             </div>`;
     }
 

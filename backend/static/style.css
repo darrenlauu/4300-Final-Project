@@ -97,13 +97,17 @@ body {
   margin-top: 50px;
 }
 
-.review-card {
+.card {
   background-color: #ffffff;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.06);
   color: #000000;
+}
+
+.card p {
+  font-size: 20px;
 }
 
 .review-title {
@@ -119,6 +123,11 @@ body {
 ::selection {
   color: #fff;
   background: #5372f0;
+}
+
+.tag {
+  padding: 4px 18px;
+  border-radius: 5px;
 }
 
 .wrapper {

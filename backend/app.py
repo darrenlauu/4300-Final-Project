@@ -61,15 +61,23 @@ def get_reviews():
     reviews = [dict(zip(keys, i)) for i in data]
     return reviews
 
-reviews = get_reviews()
-reviews_list = [d['Positive_Review'] for d in reviews]
-print("TVIBESLOG: Made the list of reviews")
+if os.path.exists("reviews.p"):
+    print("TVIBESLOG: Loading reviews and TFIDF from pickle")
+    reviews = pickle.load(open("reviews.p", "rb"))
+    vectorizer = pickle.load(open("vectorizer.p", "rb"))
+    tfIdfMatrix = pickle.load(open("tfIdfMatrix.p", "rb"))
+else:
+    print("TVIBESLOG: Pickling reviews and TFIDF from SQL")
+    reviews = get_reviews()
+    reviews_list = [d['Positive_Review'] for d in reviews]
+    print("TVIBESLOG: Made the list of reviews")
 
-vectorizer = TfidfVectorizer()
-tfIdfMatrix = vectorizer.fit_transform(reviews_list)
+    vectorizer = TfidfVectorizer()
+    tfIdfMatrix = vectorizer.fit_transform(reviews_list)
 
-# pickle(vectorizer, open("vectorizer.p", "wb"))
-# pickle(tfIdfMatrix)
+    pickle.dump(vectorizer, open("vectorizer.p", "wb"))
+    pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
+    pickle.dump(reviews, open("reviews.p", "wb"))
 
     
 print("TVIBESLOG: Made the TF-IDF matrix")
@@ -118,15 +126,28 @@ def sql_search(reviews, input_search, countries):
         index_to_similarities[i] = similarities[0][i]
     print("TVIBESLOG: Made the index to similarity dictionary")
 
-    sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
+    sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:1000]).keys()
     result = [reviews[i] for i in sorted_indices]
     print("TVIBESLOG: Sorted the indices and got the top 10 reviews")
-    return json.dumps(list(filter(lambda x: x["Country"] in countries_set, result))[:10])
+    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, result)))[:10])
 
 
 @ app.route("/")
 def home():
     return render_template('base.html', title="sample html")
+
+@ app.route("/<int:hotel_id>/")
+def hotel(hotel_id):
+    hotel_keys = ["Hotel_Name", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
+    hotel_sql = f"""SELECT {",".join(hotel_keys)} FROM hotels WHERE hotel_id = {hotel_id}"""
+    hotel = mysql_engine.query_selector(hotel_sql)
+    name, country, hid, score, t1, t2, t3, t4, t5 = [dict(zip(hotel_keys, i)) for i in hotel][0].values()
+
+    reviews_sql = f"""SELECT Positive_Review FROM reviews WHERE hotel_id = {hotel_id}"""
+    review_keys = ["Positive_Review"]
+    data = mysql_engine.query_selector(reviews_sql)
+    reviews = list(map(lambda x: x["Positive_Review"], [dict(zip(review_keys, i)) for i in data]))
+    return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews)
 
 
 @ app.route("/reviews")

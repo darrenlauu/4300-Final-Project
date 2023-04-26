@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+  <title>uhhh</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Unicons CDN Link for Icons -->
+  <link
+    rel="stylesheet"
+    href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css"
+  />
+</head>
+<body>
+  <div class="full-body-container">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" />
+    <div class="card" style="width: 70vw">
+      <a href="/">👈 Back</a>
+      <h1>🏨 {{ name }}</h1>
+      <p>⭐️ <strong>Score</strong>: {{ score }}</p>
+      <p>🗺️ <strong>Country</strong>: {{ country }}</p>
+      <div>
+        <p>
+          🔖 <strong>Tags</strong>: {% for i in range(tags|length) %}
+
+          <span id="t{{i}}" class="tag">{{tags[i]}}</span>
+
+          {% endfor %}
+        </p>
+      </div>
+      <p>🗣️ Reviews:</p>
+      <ul>
+        {% for r in reviews %}
+
+        <li>{{r}}</li>
+
+        {% endfor %}
+      </ul>
+    </div>
+    <div id="answer-box"></div>
+  </div>
+  <script>
+    function getRandomColor() {
+      var letters = "0123456789ABCDEF";
+      var color = "#";
+      for (var i = 0; i < 3; i++) {
+        var value = Math.floor(Math.random() * 256);
+        var pastelValue = Math.round((value + 255) / 2);
+        var hexValue = pastelValue.toString(16).padStart(2, "0");
+        color += hexValue;
+      }
+      return color;
+    }
+
+    for (var i = 0; i <= 4; i++) {
+      var element = document.getElementById("t" + i);
+
+      // Assign a random color to the element
+      element.style.backgroundColor = getRandomColor();
+    }
+  </script>
+</body>

@@ -61,23 +61,25 @@ def get_reviews():
     reviews = [dict(zip(keys, i)) for i in data]
     return reviews
 
-# if os.path.exists("reviews.p"):
-# print("TVIBESLOG: Loading reviews and TFIDF from pickle")
-# reviews = pickle.load(open("reviews.p", "rb"))
-# vectorizer = pickle.load(open("vectorizer.p", "rb"))
-# tfIdfMatrix = pickle.load(open("tfIdfMatrix.p", "rb"))
-# else:
-# print("TVIBESLOG: Pickling reviews and TFIDF from SQL")
-reviews = get_reviews()
-reviews_list = [d['Positive_Review'] for d in reviews]
-print("TVIBESLOG: Made the list of reviews")
+if os.path.exists("vectorizer.p"):
+    print("TVIBESLOG: Loading TFIDF from pickle")
+    vectorizer = pickle.load(open("vectorizer.p", "rb"))
+    tfIdfMatrix = pickle.load(open("tfIdfMatrix.p", "rb"))
+else:
+    print("TVIBESLOG: Pickling TFIDF from SQL")
+    reviews = get_reviews()
+    reviews_list = [d['Positive_Review'] for d in reviews]
+    print("TVIBESLOG: Made the list of reviews")
 
-vectorizer = TfidfVectorizer()
-tfIdfMatrix = vectorizer.fit_transform(reviews_list)
+    vectorizer = TfidfVectorizer(max_features=500,
+                                stop_words="english",
+                                max_df=0.1,
+                                min_df=10,
+                                norm='l2')
+    tfIdfMatrix = vectorizer.fit_transform(reviews_list)
 
-# pickle.dump(vectorizer, open("vectorizer.p", "wb"))
-# pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
-# pickle.dump(reviews, open("reviews.p", "wb"))
+    pickle.dump(vectorizer, open("vectorizer.p", "wb"))
+    pickle.dump(tfIdfMatrix, open("tfIdfMatrix.p", "wb"))
 
     
 print("TVIBESLOG: Made the TF-IDF matrix")
@@ -127,7 +129,16 @@ def sql_search(reviews, input_search, countries):
     print("TVIBESLOG: Made the index to similarity dictionary")
 
     sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:1000]).keys()
-    result = [reviews[i] for i in sorted_indices]
+    keys = ["Hotel_Name", "Positive_Review",
+            "review_id", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
+    sql_query = f"""
+    SELECT
+    H.hotel_name, Positive_Review, review_id, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
+    FROM reviews R
+    join hotels H on R.hotel_id = H.hotel_id
+    where review_id in ({",".join([str(i+1) for i in sorted_indices])})"""
+    data = mysql_engine.query_selector(sql_query)
+    result = [dict(zip(keys, i)) for i in data]
     print("TVIBESLOG: Sorted the indices and got the top 10 reviews")
     return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, result)))[:10])
 
@@ -154,7 +165,7 @@ def hotel(hotel_id):
 def reviews_search():
     text = request.args.get("title")
     countries = request.args.get("countries")
-    return sql_search(reviews, text, countries)
+    return sql_search(None, text, countries)
 
 @ app.route("/upvote/<int:hotel_id>/", methods=["POST"])
 def upvote(hotel_id):

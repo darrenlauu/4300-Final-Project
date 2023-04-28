@@ -128,22 +128,22 @@
   <script>
     function answerBoxTemplate(
       hotel_id,
-      title,
-      titleDesc,
+      hotel_name,
+      review,
       numVotes,
       country,
       averageScore,
-      tags
+      tags,
+      query
     ) {
       return `<div class='card' data-id=${hotel_id}>
-                <h3 class='review-title'>${title}</h3>
+                <h3 class='hotel-name'>${hotel_name}</h3>
                 Country: ${country}, Average Rating: ${averageScore}
                 <p class='tags'>Tags: ${tags.join(", ")}</p>
-                <p class='review-desc'>"${titleDesc}"</p>
                 <button class="upvote-button">&#9650;</button>
                 <span>0</span>
                 <button class="downvote-button">&#9660;</button>
-                <a href="/${hotel_id}">View Hotel</a>
+                <a href="/${hotel_id}?query=${query}">View Hotel</a>
             </div>`;
     }
 
@@ -162,10 +162,11 @@
       );
       // join values by comma into string
       const countryString = countryValues.join(",");
+      const query = tags.join(" ");
       fetch(
         "/reviews?" +
           new URLSearchParams({
-            title: tags.join(" "),
+            query: query,
             countries: countryString,
           }).toString()
       )
@@ -180,7 +181,8 @@
               row.Number_Votes,
               row.Country,
               row.Average_Score,
-              [row.Topic_1, row.Topic_2, row.Topic_3, row.Topic_4, row.Topic_5]
+              [row.Topic_1, row.Topic_2, row.Topic_3, row.Topic_4, row.Topic_5],
+              query
             );
             document.getElementById("answer-box").appendChild(tempDiv);
           });

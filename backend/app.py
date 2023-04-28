@@ -124,8 +124,6 @@ def sql_search(input_search, countries):
     print("TVIBESLOG: Made the index to similarity dictionary")
 
     sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:50]).keys()
-    print(index_to_similarities)
-    print(sorted_indices)
     keys = ["Hotel_Name", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
     sql_query = f"""
     SELECT
@@ -144,6 +142,7 @@ def home():
 
 @ app.route("/<int:hotel_id>/")
 def hotel(hotel_id):
+    text = request.args.get("query")
     hotel_keys = ["Hotel_Name", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
     hotel_sql = f"""SELECT {",".join(hotel_keys)} FROM hotels WHERE hotel_id = {hotel_id}"""
     hotel = mysql_engine.query_selector(hotel_sql)
@@ -154,7 +153,6 @@ def hotel(hotel_id):
     data = mysql_engine.query_selector(reviews_sql)
     reviews = [i[0] for i in data]
 
-    text = request.args.get("query")
     
     if text is not None:
         vectorizer = TfidfVectorizer(max_features=500,
@@ -175,7 +173,6 @@ def hotel(hotel_id):
         print("TVIBESLOG: hotel: Made the index to similarity dictionary")
 
         sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
-        print(sorted_indices)
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
 
     return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews)

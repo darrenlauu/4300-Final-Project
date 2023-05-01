@@ -85,9 +85,9 @@ else:
     # reviews_list = [d['Positive_Review'] for d in reviews_agg]
     print("TVIBESLOG: Made the list of reviews")
 
-    vectorizer = TfidfVectorizer(max_features=500,
+    vectorizer = TfidfVectorizer(max_features=5000,
                                 stop_words="english",
-                                max_df=0.1,
+                                max_df=0.5,
                                 min_df=10,
                                 norm='l2')
     tfIdfMatrix = vectorizer.fit_transform(reviews_agg)
@@ -129,11 +129,20 @@ def sql_search(input_search, countries):
     SELECT
     H.hotel_name, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
     FROM hotels H
-    where hotel_id in ({",".join([str(i+1) for i in sorted_indices])})"""
+    where hotel_id in ({",".join([str(i) for i in sorted_indices])})"""
     data = mysql_engine.query_selector(sql_query)
     result = [dict(zip(keys, i)) for i in data]
+    hotel_id_to_index = dict()
+    for index, hotel in enumerate(result):
+        hotel_id_to_index[hotel["Hotel_ID"]] = index
+
+    sorted_result = []
+    for hotel_id in sorted_indices:
+        idx = hotel_id_to_index[hotel_id]
+        sorted_result.append(result[idx])
+
     print("TVIBESLOG: Sorted the indices and got the top 50 hotels")
-    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, result)))[:50])
+    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, sorted_result)))[:50])
 
 
 @ app.route("/")
@@ -155,9 +164,9 @@ def hotel(hotel_id):
 
     
     if text is not None:
-        vectorizer = TfidfVectorizer(max_features=500,
+        vectorizer = TfidfVectorizer(max_features=5000,
                             stop_words="english",
-                            max_df=0.1,
+                            max_df=0.5,
                             min_df=10,
                             norm='l2')
         
@@ -173,6 +182,7 @@ def hotel(hotel_id):
         print("TVIBESLOG: hotel: Made the index to similarity dictionary")
 
         sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
+        print(dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]))
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
 
     return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews)

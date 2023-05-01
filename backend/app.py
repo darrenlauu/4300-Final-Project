@@ -167,24 +167,29 @@ def hotel(hotel_id):
 
     
     if text is not None:
-        vectorizer = TfidfVectorizer(max_features=5000,
-                            stop_words="english",
-                            max_df=0.5,
-                            min_df=10,
-                            norm='l2')
+        vectorizer = TfidfVectorizer(max_features=5000, stop_words="english", max_df=0.5, min_df=10, norm='l2')
         
         tfIdfMatrix = vectorizer.fit_transform(reviews)
         print("TVIBESLOG: hotel: Made the TF-IDF matrix")
 
-        svd = TruncatedSVD()
-        svd_matrix = svd.fit_transform(tfIdfMatrix)
-        print("TVIBESLOG: hotel: Made the SVD matrix")
-
-        indices = svd.components_.argsort()[:,-10:]
+        X = vectorizer.fit_transform(reviews + [text])
         terms = vectorizer.get_feature_names()
+        co_occurrence = np.dot(X.T, X).toarray()
+        print("TVIBESLOG: hotel: Made the co-occurrence matrix")
 
-        expanded_text = text + ' ' + ' '.join([terms[i] for i in indices.flatten()])
-        print("TVIBESLOG: hotel: Here is the expanded query:", expanded_text)
+        query_terms = text.split()
+        relevant_terms = [term for term in query_terms if term in terms]
+        expanded_query = query_terms
+
+        for term in relevant_terms:
+            idx = terms.index(term)
+            associated_terms = co_occurrence[idx].argsort()
+            associated_terms = associated_terms[::-1][:5]
+            for i in associated_terms:
+                expanded_query.append(terms[i])
+                
+        words_to_highlight = list(set(expanded_query))
+        print("TVIBESLOG: hotel: Here are the words to highlight:", words_to_highlight)
 
         # compute similarity with ORIGINAL query, not the expanded one
         query = vectorizer.transform([text])

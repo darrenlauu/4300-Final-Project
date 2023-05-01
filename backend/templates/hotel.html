@@ -90,7 +90,7 @@
   </script>
   <script>
     var reviews = document.getElementsByClassName("review-text");
-    var highlight_words = document.getElementById("highlight-words").innerHTML.split(",");
+    var highlight_words = document.getElementById("highlight-words").innerHTML.trim().split(",");
     for (var i=0; i<reviews.length; i++) {
       var str = reviews[i].innerHTML;
       var regex = new RegExp('\\b(' + highlight_words.join('|') + ')\\b', 'gi');

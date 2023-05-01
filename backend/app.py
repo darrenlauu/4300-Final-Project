@@ -185,7 +185,16 @@ def hotel(hotel_id):
 
         sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
-    return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews, scores=scores)
+    return render_template(
+        'hotel.html',
+        name=name, 
+        country=country, 
+        hid=hid, 
+        score=float(score), 
+        tags=[t1, t2, t3, t4, t5], 
+        reviews=reviews, 
+        scores=scores
+    )
 
 
 @ app.route("/reviews")

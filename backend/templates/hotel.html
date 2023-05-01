@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-  <title>uhhh</title>
+  <title> {{ name }} </title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,10 +17,23 @@
 <body>
   <div class="full-body-container">
     <img src="{{ url_for('static', filename='images/logo.png') }}" />
-    <div class="card" style="width: 70vw">
+    <div class="card" style="width: 50vw">
       <a href="/">👈 Back</a>
       <h1>🏨 {{ name }}</h1>
-      <p>⭐️ <strong>Score</strong>: {{ score }}</p>
+      <p>⭐️ <strong>Score</strong>:
+      {% for star_count in range((score // 2) | int) %}
+          <img src="{{ url_for('static', filename='images/full-star.png') }}" width="20px" />
+          {% endfor %}
+
+          {% if ((score | int) % 2) == 1 %}
+          <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
+          {% endif %}
+
+          {% for star_count in range(5 - ((score // 2) | int) - ((score | int) % 2)) %}
+          <img src="{{ url_for('static', filename='images/empty-star.png') }}" width="20px" />
+          {% endfor %}
+          {{ score }} / 10
+      </p>
       <p>🗺️ <strong>Country</strong>: {{ country }}</p>
       <div>
         <p>
@@ -32,21 +45,26 @@
         </p>
       </div>
       <p>🗣️ Reviews:</p>
-      <ul>
         {% for idx in range(reviews|length) %}
+        <div class="review-card">
+          <div>
           {% for star_count in range((scores[idx] // 2) | int) %}
-          <img src="{{ url_for('static', filename='images/star.png') }}" width="20px" />
+          <img src="{{ url_for('static', filename='images/full-star.png') }}" width="20px" />
           {% endfor %}
 
           {% if ((scores[idx] | int) % 2) == 1 %}
           <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
           {% endif %}
-          
 
-          <li>{{reviews[idx]}}</li>
+          {% for star_count in range(5 - ((scores[idx] // 2) | int) - ((scores[idx] | int) % 2)) %}
+          <img src="{{ url_for('static', filename='images/empty-star.png') }}" width="20px" />
+          {% endfor %}
+          </div>
+
+          <span>{{reviews[idx]}}</span>
+        </div>
 
         {% endfor %}
-      </ul>
     </div>
     <div id="answer-box"></div>
   </div>

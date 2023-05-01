@@ -143,7 +143,7 @@ def sql_search(input_search, countries):
         sorted_result.append(result[idx])
 
     print("TVIBESLOG: Sorted the indices and got the top 50 hotels")
-    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, sorted_result)))[:50])
+    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, sorted_result)))[:25])
 
 
 @ app.route("/")
@@ -163,7 +163,7 @@ def hotel(hotel_id):
     reviews_and_scores = [(i[0], i[1]) for i in data]
     reviews = list(map(lambda x: x[0], reviews_and_scores))
     scores = list(map(lambda x: float(x[1]), reviews_and_scores))
-    rel_terms = []
+    words_to_highlight = []
     
     if text is not None:
         vectorizer = TfidfVectorizer(max_features=5000, stop_words="english", max_df=0.5, min_df=10, norm='l2')
@@ -212,7 +212,7 @@ def hotel(hotel_id):
         tags=[t1, t2, t3, t4, t5], 
         reviews=reviews, 
         scores=scores,
-        rel_words=(",".join(rel_terms))
+        rel_words=(",".join(words_to_highlight))
     )
 
 

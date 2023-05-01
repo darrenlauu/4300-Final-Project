@@ -61,12 +61,12 @@
           {% endfor %}
           </div>
 
-          <span>{{reviews[idx]}}</span>
+          <span class="review-text">{{reviews[idx]}}</span>
         </div>
 
         {% endfor %}
     </div>
-    <div id="answer-box"></div>
+    <p id="highlight-words" style="visibility: hidden; opacity: 0; "> {{rel_words}} </p>
   </div>
   <script>
     function getRandomColor() {
@@ -86,6 +86,16 @@
 
       // Assign a random color to the element
       element.style.backgroundColor = getRandomColor();
+    }
+  </script>
+  <script>
+    var reviews = document.getElementsByClassName("review-text");
+    var highlight_words = document.getElementById("highlight-words").innerHTML.split(",");
+    for (var i=0; i<reviews.length; i++) {
+      var str = reviews[i].innerHTML;
+      var regex = new RegExp('\\b(' + highlight_words.join('|') + ')\\b', 'gi');
+      var highlightedText = str.replace(regex, '<span class="highlight">$1</span>');
+      reviews[i].innerHTML = highlightedText;
     }
   </script>
 </body>

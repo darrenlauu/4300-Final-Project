@@ -163,7 +163,6 @@ def hotel(hotel_id):
     reviews_and_scores = [(i[0], i[1]) for i in data]
     reviews = list(map(lambda x: x[0], reviews_and_scores))
     scores = list(map(lambda x: float(x[1]), reviews_and_scores))
-    print(scores)
 
     
     if text is not None:
@@ -181,9 +180,10 @@ def hotel(hotel_id):
         print("TVIBESLOG: hotel: Made the SVD matrix")
 
         indices = svd.components_.argsort()[:,-10:]
-        terms = vectorizer.get_feature_names()
+        all_terms = vectorizer.get_feature_names()
+        rel_terms = text.split(" ") + [all_terms[i] for i in indices.flatten()]
 
-        expanded_text = text + ' ' + ' '.join([terms[i] for i in indices.flatten()])
+        expanded_text = text + ' ' + ' '.join(rel_terms)
         print("TVIBESLOG: hotel: Here is the expanded query:", expanded_text)
 
         # compute similarity with ORIGINAL query, not the expanded one
@@ -207,7 +207,8 @@ def hotel(hotel_id):
         score=float(score), 
         tags=[t1, t2, t3, t4, t5], 
         reviews=reviews, 
-        scores=scores
+        scores=scores,
+        rel_words=(",".join(rel_terms))
     )
 
 

@@ -163,7 +163,7 @@ def hotel(hotel_id):
     reviews_and_scores = [(i[0], i[1]) for i in data]
     reviews = list(map(lambda x: x[0], reviews_and_scores))
     scores = list(map(lambda x: float(x[1]), reviews_and_scores))
-
+    rel_terms = []
     
     if text is not None:
         vectorizer = TfidfVectorizer(max_features=5000,

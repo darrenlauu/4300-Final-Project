@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.decomposition import TruncatedSVD
 import feedback
 import operator
 
@@ -173,8 +174,21 @@ def hotel(hotel_id):
                             norm='l2')
         
         tfIdfMatrix = vectorizer.fit_transform(reviews)
+        print("TVIBESLOG: hotel: Made the TF-IDF matrix")
 
+        svd = TruncatedSVD()
+        svd_matrix = svd.fit_transform(tfIdfMatrix)
+        print("TVIBESLOG: hotel: Made the SVD matrix")
+
+        indices = svd.components_.argsort()[:,-10:]
+        terms = vectorizer.get_feature_names()
+
+        expanded_text = text + ' ' + ' '.join([terms[i] for i in indices.flatten()])
+        print("TVIBESLOG: hotel: Here is the expanded query:", expanded_text)
+
+        # compute similarity with ORIGINAL query, not the expanded one
         query = vectorizer.transform([text])
+
         similarities = cosine_similarity(query, tfIdfMatrix)
         print("TVIBESLOG: hotel: Computed the cosine similarity")
 

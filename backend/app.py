@@ -64,12 +64,12 @@ def get_reviews(idx=None):
     return reviews
 
 def agg_reviews(reviews):
-    num_hotels = max(set([review["Hotel_ID"] for review in reviews])) + 1
+    num_hotels = max(set([review["Hotel_ID"] for review in reviews]))
     result = ["" for _ in range(num_hotels)]
     id_to_hotel = dict()
     for review in reviews:
         hotel_name, hotel_id, rev = review["Hotel_Name"], review["Hotel_ID"], review['Positive_Review']
-        result[hotel_id] += rev
+        result[hotel_id - 1] += rev
         if hotel_id not in id_to_hotel:
             id_to_hotel[hotel_id] = hotel_name
     return result, id_to_hotel
@@ -122,14 +122,14 @@ def sql_search(input_search, countries):
     for i in range(len(similarities[0])):
         index_to_similarities[i] = similarities[0][i]
     print("TVIBESLOG: Made the index to similarity dictionary")
-
+    all_indices = sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)
     sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:50]).keys()
     keys = ["Hotel_Name", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
     sql_query = f"""
     SELECT
     H.hotel_name, H.country, H.hotel_id, H.average_score, H.Topic_1, H.Topic_2, H.Topic_3, H.Topic_4, H.Topic_5
     FROM hotels H
-    where hotel_id in ({",".join([str(i) for i in sorted_indices])})"""
+    where hotel_id in ({",".join([str(i+1) for i in sorted_indices])})"""
     data = mysql_engine.query_selector(sql_query)
     result = [dict(zip(keys, i)) for i in data]
     hotel_id_to_index = dict()
@@ -138,7 +138,7 @@ def sql_search(input_search, countries):
 
     sorted_result = []
     for hotel_id in sorted_indices:
-        idx = hotel_id_to_index[hotel_id]
+        idx = hotel_id_to_index[hotel_id+1]
         sorted_result.append(result[idx])
 
     print("TVIBESLOG: Sorted the indices and got the top 50 hotels")
@@ -157,10 +157,12 @@ def hotel(hotel_id):
     hotel = mysql_engine.query_selector(hotel_sql)
     name, country, hid, score, t1, t2, t3, t4, t5 = [dict(zip(hotel_keys, i)) for i in hotel][0].values()
 
-    reviews_sql = f"""SELECT Positive_Review FROM reviews WHERE hotel_id = {hotel_id}"""
-    # review_keys = ["Positive_Review"]
+    reviews_sql = f"""SELECT Positive_Review, Reviewer_Score FROM reviews WHERE hotel_id = {hotel_id}"""
     data = mysql_engine.query_selector(reviews_sql)
-    reviews = [i[0] for i in data]
+    reviews_and_scores = [(i[0], i[1]) for i in data]
+    reviews = list(map(lambda x: x[0], reviews_and_scores))
+    scores = list(map(lambda x: float(x[1]), reviews_and_scores))
+    print(scores)
 
     
     if text is not None:
@@ -182,10 +184,8 @@ def hotel(hotel_id):
         print("TVIBESLOG: hotel: Made the index to similarity dictionary")
 
         sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
-        print(dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]))
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
-
-    return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews)
+    return render_template('hotel.html', name=name, country=country, hid=hid, score=float(score), tags=[t1, t2, t3, t4, t5], reviews=reviews, scores=scores)
 
 
 @ app.route("/reviews")

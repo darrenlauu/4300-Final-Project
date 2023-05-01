@@ -33,9 +33,17 @@
       </div>
       <p>🗣️ Reviews:</p>
       <ul>
-        {% for r in reviews %}
+        {% for idx in range(reviews|length) %}
+          {% for star_count in range((scores[idx] // 2) | int) %}
+          <img src="{{ url_for('static', filename='images/star.png') }}" width="20px" />
+          {% endfor %}
 
-        <li>{{r}}</li>
+          {% if ((scores[idx] | int) % 2) == 1 %}
+          <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
+          {% endif %}
+          
+
+          <li>{{reviews[idx]}}</li>
 
         {% endfor %}
       </ul>

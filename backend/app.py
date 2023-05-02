@@ -171,9 +171,8 @@ def hotel(hotel_id):
         tfIdfMatrix = vectorizer.fit_transform(reviews)
         print("TVIBESLOG: hotel: Made the TF-IDF matrix")
 
-        X = vectorizer.fit_transform(reviews + [text])
         terms = vectorizer.get_feature_names()
-        co_occurrence = np.dot(X.T, X).toarray()
+        co_occurrence = np.dot(tfIdfMatrix.T, tfIdfMatrix).toarray()
         print("TVIBESLOG: hotel: Made the co-occurrence matrix")
 
         query_terms = text.split()

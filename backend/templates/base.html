@@ -149,11 +149,12 @@
       tags,
       query
     ) {
+      var tags_html = tags.map((str, id) => ('<span class="tag" style="background-color:'+getRandomColor()+'"> ' + str + '</span>'));
       return `<div class='card' data-id=${hotel_id}>
                 <h3 class='hotel-name'>${hotel_name}</h3>
                 Country: ${country}, Average Rating: ${averageScore}
-                <p class='tags'>Tags: ${tags.join(", ")}</p>
-                <a href="/${hotel_id}?query=${query}">View Hotel</a>
+                <p class='tags'>Tags: ${tags_html.join(" ")}</p>
+                <div style="text-align:center;margin-top: 20px;"><a class="hotel-button" href="/${hotel_id}?query=${query}">View Hotel</a></div>
             </div>`;
     }
 

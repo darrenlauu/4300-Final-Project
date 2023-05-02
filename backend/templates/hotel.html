@@ -18,7 +18,7 @@
   <div class="full-body-container">
     <img src="{{ url_for('static', filename='images/logo.png') }}" />
     <div class="card" style="width: 50vw">
-      <a href="/">👈 Back</a>
+      <a href="/" style="text-decoration: none;">👈 Back</a>
       <h1>🏨 {{ name }}</h1>
       <p>⭐️ <strong>Score</strong>:
       {% for star_count in range((score // 2) | int) %}

@@ -129,6 +129,18 @@ body {
   font-family: "Montserrat", sans-serif;
 }
 
+.tags {
+  margin-bottom: 40px;
+}
+
+.hotel-button {
+  color: #fff;
+  background: #04316d;
+  padding: 8px 28px;
+  border-radius: 20px;
+  text-decoration: none;
+}
+
 /* from https://www.codingnepalweb.com/tags-input-box-html-javascript/ */
 
 ::selection {

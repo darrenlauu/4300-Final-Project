@@ -77,7 +77,7 @@
         <ul class="pagination">
           {% if (cur_page > 1) %}
             <li class="page-item">
-              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page-1) }}">Previous</a>
+              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page-1, query=query) }}">Previous</a>
             </li>
           {% else %}
             <li class="page-item disabled">
@@ -89,13 +89,13 @@
             <li class="page-item">
               {% if (page_no + 1 == cur_page)%}
                 <li class="page-item active" aria-current="page">
-                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1) }}">
+                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1, query=query) }}">
                     {{page_no+1}} <span class="visually-hidden">(current)</span>
                   </a>
                 </li>
               {% else %}
                 <li class="page-item">
-                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1) }}">
+                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1, query=query) }}">
                     {{page_no+1}}
                   </a>
                 </li>
@@ -106,7 +106,7 @@
           
           {% if (cur_page < num_pages) %}
             <li class="page-item">
-              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page+1) }}">Next</a>
+              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page+1, query=query) }}">Next</a>
             </li>
           {% else %}
             <li class="page-item disabled">

@@ -227,10 +227,6 @@ def hotel(hotel_id):
     page_number = int(page_number)
     start = (page_number - 1) * REVIEWS_PER_PAGE
     reviews = reviews[start:start + REVIEWS_PER_PAGE]
-
-    print("length of reviews: " + str(num_reviews))
-    print(str(REVIEWS_PER_PAGE))
-    print(str(math.ceil(num_reviews / REVIEWS_PER_PAGE)))
     
     return render_template(
         'hotel.html',
@@ -242,6 +238,7 @@ def hotel(hotel_id):
         reviews=reviews, 
         scores=scores,
         rel_words=(",".join(words_to_highlight)),
+        query=text,
         num_pages=(math.ceil(num_reviews / REVIEWS_PER_PAGE)),
         cur_page=page_number
     )

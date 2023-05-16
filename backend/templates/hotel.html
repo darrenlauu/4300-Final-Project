@@ -85,7 +85,7 @@
             </li>
           {% endif %}
           
-          {% for page_no in range([0, cur_page - 2 ] | max, [num_pages, cur_page + 8] | min) %}
+          {% for page_no in range([num_pages - 10, ([0, cur_page - 2 ] | max)] | min, [num_pages, cur_page + 8] | min) %}
             <li class="page-item">
               {% if (page_no + 1 == cur_page)%}
                 <li class="page-item active" aria-current="page">

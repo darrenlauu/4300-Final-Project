@@ -221,11 +221,12 @@ def hotel(hotel_id):
             index_to_similarities[i] = similarities[0][i]
         print("TVIBESLOG: hotel: Made the index to similarity dictionary")
 
-        sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
+        sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)).keys()
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
 
     page_number = int(page_number)
     start = (page_number - 1) * REVIEWS_PER_PAGE
+
     reviews = reviews[start:start + REVIEWS_PER_PAGE]
     
     return render_template(

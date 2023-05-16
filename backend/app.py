@@ -114,9 +114,12 @@ def find_section(text, attr):
             lst.append(i)
     return min(lst), max(lst)
 
-def sql_search(input_search, countries):
+def sql_search(input_search, countries, tags=None):
     countries_list = countries.split(",")
     countries_set = set(countries_list)
+
+    tags_list = tags.split(",")
+    tags_set = set(tags_list)
 
     query = vectorizer.transform([input_search])
     similarities = cosine_similarity(query, tfIdfMatrix)
@@ -144,9 +147,13 @@ def sql_search(input_search, countries):
     for hotel_id in sorted_indices:
         idx = hotel_id_to_index[hotel_id+1]
         sorted_result.append(result[idx])
+    
+    filtered_by_tags = list(filter(lambda x: True, filter(lambda x: x["Topic_1"] in tags_set or x["Topic_2"] in tags_set or x["Topic_3"] in tags_set or x["Topic_4"] in tags_set or x["Topic_5"] in tags_set, sorted_result)))
+    filtered_by_countries = list(filter(lambda x: x["Country"] in countries_set, filtered_by_tags))
+
 
     print("TVIBESLOG: Sorted the indices and got the top 50 hotels")
-    return json.dumps(list(filter(lambda x: True, filter(lambda x: x["Country"] in countries_set, sorted_result)))[:25])
+    return json.dumps(filtered_by_countries[:25])
 
 
 @ app.route("/")

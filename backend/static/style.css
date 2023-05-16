@@ -2,6 +2,10 @@
   background-color: #04316d;
 }
 
+.input-group {
+  margin: 10px 0px;
+}
+
 .pagination .page-link {
   color: white;
 }

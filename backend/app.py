@@ -4,6 +4,7 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import numpy as np
+import math
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -22,6 +23,8 @@ MYSQL_USER = "root"
 MYSQL_USER_PASSWORD = os.environ.get("MYSQL_ROOT_PASSWORD")
 MYSQL_PORT = 3306
 MYSQL_DATABASE = "kardashiandb"
+
+REVIEWS_PER_PAGE = 10
 
 mysql_engine = MySQLDatabaseHandler(
     MYSQL_USER, MYSQL_USER_PASSWORD, MYSQL_PORT, MYSQL_DATABASE)
@@ -153,6 +156,8 @@ def home():
 @ app.route("/<int:hotel_id>/")
 def hotel(hotel_id):
     text = request.args.get("query")
+    page_number = request.args.get("page_number", 1)
+
     hotel_keys = ["Hotel_Name", "Country", "Hotel_ID", "Average_Score", 'Topic_1', 'Topic_2', 'Topic_3', 'Topic_4', 'Topic_5']
     hotel_sql = f"""SELECT {",".join(hotel_keys)} FROM hotels WHERE hotel_id = {hotel_id}"""
     hotel = mysql_engine.query_selector(hotel_sql)
@@ -164,6 +169,7 @@ def hotel(hotel_id):
     reviews = list(map(lambda x: x[0], reviews_and_scores))
     scores = list(map(lambda x: float(x[1]), reviews_and_scores))
     words_to_highlight = []
+    num_reviews = len(reviews)
     
     if text is not None:
         vectorizer = TfidfVectorizer(max_features=5000, stop_words="english", max_df=0.5, min_df=10, norm='l2')
@@ -202,6 +208,15 @@ def hotel(hotel_id):
 
         sorted_indices = dict(sorted(index_to_similarities.items(), key=operator.itemgetter(1), reverse=True)[:100]).keys()
         reviews = list(map(lambda idx: reviews[idx], sorted_indices))
+
+    page_number = int(page_number)
+    start = (page_number - 1) * REVIEWS_PER_PAGE
+    reviews = reviews[start:start + REVIEWS_PER_PAGE]
+
+    print("length of reviews: " + str(num_reviews))
+    print(str(REVIEWS_PER_PAGE))
+    print(str(math.ceil(num_reviews / REVIEWS_PER_PAGE)))
+    
     return render_template(
         'hotel.html',
         name=name, 
@@ -211,7 +226,9 @@ def hotel(hotel_id):
         tags=[t1, t2, t3, t4, t5], 
         reviews=reviews, 
         scores=scores,
-        rel_words=(",".join(words_to_highlight))
+        rel_words=(",".join(words_to_highlight)),
+        num_pages=(math.ceil(num_reviews / REVIEWS_PER_PAGE)),
+        cur_page=page_number
     )
 
 

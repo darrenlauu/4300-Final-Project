@@ -8,43 +8,76 @@
     href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
     rel="stylesheet"
   />
-  <!-- Unicons CDN Link for Icons -->
+  <!-- Font Awesome -->
   <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     rel="stylesheet"
-    href="https://unicons.iconscout.com/release/v4.0.0/css/thinline.css"
+  />
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- MDB -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.3.0/mdb.min.css"
+    rel="stylesheet"
   />
 </head>
-<body>
+<body class="custom-bg">
   <div class="full-body-container">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" />
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" /></a>
+    <div style="width: 50vw; margin: 10px 2px">
+      <a href="/" style="float: left; color: white;"><i class="fa-solid fa-arrow-left"></i>  Back</a>
+    </div>
     <div class="card" style="width: 50vw">
-      <a href="/" style="text-decoration: none;">👈 Back</a>
-      <h1>🏨 {{ name }}</h1>
-      <p>⭐️ <strong>Score</strong>:
-      {% for star_count in range((score // 2) | int) %}
-          <img src="{{ url_for('static', filename='images/full-star.png') }}" width="20px" />
-          {% endfor %}
+      <div class="card-body">
+        <h1 class="card-title">{{ name }}</h5></li>
+        <h6 class="card-subtitle mb-2 text-muted">📍 Country: <span style="color: black">{{ country }}</span> </h6>
+        <h6 class="card-subtitle mb-2 text-muted">⭐️ Rating: <span style="color: black">{{ score }}</span> / 10 </h6>
+        <h6 class="card-subtitle mb-2 text-muted">🔖 Tags:
+          <div class="tags">
+            {% for i in range(tags|length) %}
 
-          {% if ((score | int) % 2) == 1 %}
-          <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
-          {% endif %}
+            <span id="t{{i}}" class="tag btn btn-secondary" style="color: #444444;font-size: 14px;">{{tags[i]}}</span>
 
-          {% for star_count in range(5 - ((score // 2) | int) - ((score | int) % 2)) %}
-          <img src="{{ url_for('static', filename='images/empty-star.png') }}" width="20px" />
-          {% endfor %}
-          {{ score }} / 10
-      </p>
-      <p>🗺️ <strong>Country</strong>: {{ country }}</p>
-      <div>
-        <p>
-          🔖 <strong>Tags</strong>: {% for i in range(tags|length) %}
-
-          <span id="t{{i}}" class="tag">{{tags[i]}}</span>
-
-          {% endfor %}
-        </p>
+            {% endfor %}
+          </div>
+        </h6>
+        <div style="height: 10px"></div>
       </div>
-      <p>🗣️ Reviews:</p>
+      <!-- <div class="card-body">
+        <a href="/" style="text-decoration: none;">👈 Back</a>
+        <h1>🏨 {{ name }}</h1>
+        <p>⭐️ <strong>Score</strong>:
+        {% for star_count in range((score // 2) | int) %}
+            <img src="{{ url_for('static', filename='images/full-star.png') }}" width="20px" />
+            {% endfor %}
+
+            {% if ((score | int) % 2) == 1 %}
+            <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
+            {% endif %}
+
+            {% for star_count in range(5 - ((score // 2) | int) - ((score | int) % 2)) %}
+            <img src="{{ url_for('static', filename='images/empty-star.png') }}" width="20px" />
+            {% endfor %}
+            {{ score }} / 10
+        </p>
+        <p>🗺️ <strong>Country</strong>: {{ country }}</p>
+        <div>
+          <p>
+            🔖 <strong>Tags</strong>: {% for i in range(tags|length) %}
+
+            <span id="t{{i}}" class="tag">{{tags[i]}}</span>
+
+            {% endfor %}
+          </p>
+        </div> -->
+      </div>
+    <div class="card" style="width: 50vw">
+      <div class="card-body">
+        <h3 class="card-title">🗣️ Reviews</h3>
+        <h6 class="card-subtitle"> (Page {{cur_page}} of {{num_pages}})</h6>
         {% for idx in range(reviews|length) %}
         <div class="review-card">
           <div>
@@ -65,7 +98,50 @@
         </div>
 
         {% endfor %}
+      </div>
     </div>
+      <nav aria-label="...">
+        <ul class="pagination">
+          {% if (cur_page > 1) %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page-1) }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <a class="page-link">Previous</a>
+            </li>
+          {% endif %}
+          
+          {% for page_no in range([0, cur_page - 2 ] | max, [num_pages, cur_page + 8] | min) %}
+            <li class="page-item">
+              {% if (page_no + 1 == cur_page)%}
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1) }}">
+                    {{page_no+1}} <span class="visually-hidden">(current)</span>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=page_no+1) }}">
+                    {{page_no+1}}
+                  </a>
+                </li>
+              {% endif %}
+              
+            </li>
+          {% endfor %}
+          
+          {% if (cur_page < num_pages) %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('hotel', hotel_id=hid, page_number=cur_page+1) }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <a class="page-link">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
     <p id="highlight-words" style="visibility: hidden; opacity: 0; "> {{rel_words}} </p>
   </div>
   <script>
@@ -98,4 +174,9 @@
       reviews[i].innerHTML = highlightedText;
     }
   </script>
+  <!-- MDB -->
+  <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.3.0/mdb.min.js"
+  ></script>
 </body>

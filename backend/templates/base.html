@@ -36,98 +36,36 @@
     <div class="top-text">
       <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" /></a>
       <div class="card" style="min-width: 30vw">
-        <div class="card-body" style="text-align: center;">
+        <div class="card-body">
+          <h5>What are you looking for?</h5>
           <div class="input-group">
             <div class="form-outline">
               <input type="search" id="search" class="form-control" onkeyup="if (event.keyCode == 13){filterText()}"/>
-              <label class="form-label" for="search">What's your vibe?</label>
+              <label class="form-label" for="search">Describe your vibe</label>
             </div>
             <button type="button" class="btn btn-primary" onclick="filterText()">
               <i class="fas fa-search"></i>
             </button>
           </div>
-          <div class="input-group">
-            <div class="form-outline">
-              <select multiple id="select-tags" class="form-control" aria-placeholder="tags">
+          <h5>Tags</h5>
+          <div class="input-group select-tags-wrapper">
+              <select multiple id="select-tags" class="form-control">
                 <option value="1">Loading</option>
               </select>
-            </div>
           </div>
-          <div class="input-group">
-            <div class="form-outline">
-              <select multiple id="select-countries" class="form-control" aria-placeholder="tags">
+          <h5>Countries</h5>
+          <div class="input-group select-countries-wrapper">
+              <select multiple id="select-countries" class="form-control">
                 <option value="Spain" class="country-option">Spain</option>
                 <option value="Netherlands" class="country-option">Netherlands</option>
                 <option value="Italy" class="country-option">Italy</option>
-                <option value="Italy" class="country-option">United Kingdom</option>
-                <option value="Italy" class="country-option">France</option>
+                <option value="United Kingdom" class="country-option">United Kingdom</option>
+                <option value="France" class="country-option">France</option>
               </select>
-            </div>
           </div>
-          <div class="select-countries">
-            <!-- <label>
-              <input
-                type="checkbox"
-                id="select-all-btn"
-                class="form-check-input"
-                name="countries[]"
-                value="Select All"
-                checked
-              />
-              (Select All) </label
-            ><br />
-            <label>
-              <input
-                type="checkbox"
-                class="form-check-input country-checkbox"
-                name="countries[]"
-                value="Spain"
-                checked
-              />
-              Spain </label
-            ><br />
-            <label>
-              <input
-                type="checkbox"
-                class="form-check-input country-checkbox"
-                name="countries[]"
-                value="Netherlands"
-                checked
-              />
-              Netherlands </label
-            ><br />
-            <label>
-              <input
-                type="checkbox"
-                class="form-check-input country-checkbox"
-                name="countries[]"
-                value="Italy"
-                checked
-              />
-              Italy </label
-            ><br />
-            <label>
-              <input
-                type="checkbox"
-                class="form-check-input country-checkbox"
-                name="countries[]"
-                value="United Kingdom"
-                checked
-              />
-              United Kingdom </label
-            ><br />
-            <label>
-              <input
-                type="checkbox"
-                class="form-check-input country-checkbox"
-                name="countries[]"
-                value="France"
-                checked
-              />
-              France </label
-            ><br /> -->
+          <div style="text-align: center;">
+            <button type="button" class="btn btn-primary" onclick="filterText()">Search</button>
           </div>
-          <button type="button" class="btn btn-primary" onclick="filterText()">Search</button>
         </div>
       </div>
       
@@ -139,33 +77,17 @@
     document.getElementById("select-tags").innerHTML = (tag_options.map((tag_el) => ('<option value="' + tag_el + '" class="tag-option">' + tag_el + '</option>'))).join("")
     $(document).ready(function() {
 			$('#select-tags').select2({
-        placeholder: "Select tags",
+        placeholder: "Type to search tags",
         allowClear: true
       });
       $('#select-countries').select2({
-        placeholder: "Select countries",
+        placeholder: "Type to search countries",
         allowClear: true
       });
 		});
 
     const selectAllBtn = document.getElementById("select-all-btn");
     const countryCheckboxes = document.querySelectorAll(".country-option");
-
-    // selectAllBtn.addEventListener("change", () => {
-    //   const checked = selectAllBtn.checked;
-    //   for (const checkbox of countryCheckboxes) {
-    //     checkbox.checked = checked;
-    //   }
-    //   filterText();
-    // });
-
-    // for (const checkbox of countryCheckboxes) {
-    //   checkbox.addEventListener("change", () => {
-    //     const allSelected = [...countryCheckboxes].every((cb) => cb.checked);
-    //     selectAllBtn.checked = allSelected;
-    //     filterText();
-    //   });
-    // }
   </script>
   <script>
     function getRandomColor() {
@@ -196,20 +118,11 @@
                   <h5 class="card-title">${hotel_name}</h5></li>
                   <h6 class="card-subtitle mb-2 text-muted">📍 Country: <span style="color: black">${country}</span> </h6>
                   <h6 class="card-subtitle mb-2 text-muted">⭐️ Rating: <span style="color: black">${averageScore}</span> / 10</h6>
-                  <h6 class="card-subtitle mb-2 text-muted">🔖 Tags: <div class="tags">${tags_html.join(" ")}</div></h6>
+                  <h6 class="card-subtitle mb-2 text-muted tags">🔖 Tags: ${tags_html.join(" ")}</h6>
                   <div style="height: 10px"></div>
                   <a class="btn btn-primary btn-lg" href="/${hotel_id}?query=${query}?page_number=1" role="button">View Hotel</a>
                 </div>
               </div>`;
-
-              // <div style="text-align:center;margin-top: 20px;"><a class="hotel-button" href="/${hotel_id}?query=${query}">View Hotel</a></div>
-      // return `<div class="card">
-      //         <div class="card-body">
-      //           <h5 class="card-title">Card title</h5>
-      //           <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-      //           <button type="button" class="btn btn-primary">Button</button>
-      //         </div>
-      //       </div>`
     }
 
     function sendFocus() {
@@ -219,22 +132,28 @@
     function filterText() {
       document.getElementById("answer-box").innerHTML = "";
       const selectedCountryOptions = document.querySelectorAll(
-        ".select2-selection__choice"
+        ".select-countries-wrapper .select2-selection__choice"
       );
-      // get a list of all checkbox values
+      const selectedTagOptions = document.querySelectorAll(
+        ".select-tags-wrapper .select2-selection__choice"
+      );
+      // get a list of all selected values
       const countryValues = Array.from(selectedCountryOptions).map(
         (option) => option.textContent.substring(1)
       );
-      console.log("country values");
-      console.log(countryValues);
+      const tagValues = Array.from(selectedTagOptions).map(
+        (option) => option.textContent.substring(1)
+      );
       // join values by comma into string
       const countryString = countryValues.join(",");
+      const tagString = tagValues.join(",");
       const query = document.getElementById("search").value;
       fetch(
         "/reviews?" +
           new URLSearchParams({
             query: query,
             countries: countryString,
+            tags: tagString
           }).toString()
       )
         .then((response) => response.json())
@@ -276,36 +195,6 @@
         filterText();
       } 
     }
-
-    // tags = [];
-    // createTag();
-    // function createTag() {
-    //   ul.querySelectorAll("li").forEach((li) => li.remove());
-    //   tags
-    //     .slice()
-    //     .reverse()
-    //     .forEach((tag) => {
-    //       let liTag = `<li>${tag} <i class="uit uit-multiply" onclick="remove(this, '${tag}'); filterText();"></i></li>`;
-    //       ul.insertAdjacentHTML("afterbegin", liTag);
-    //     });
-    // }
-    // function remove(element, tag) {
-    //   let index = tags.indexOf(tag);
-    //   tags = [...tags.slice(0, index), ...tags.slice(index + 1)];
-    //   element.parentElement.remove();
-    // }
-    // function addTag(e) {
-    //   let tag = e.target.value.replace(/\s+/g, " ");
-    //   if (tag.length > 1 && !tags.includes(tag)) {
-    //     let tags_split = tag.split(",");
-    //     if (tags_split.length > 0) {
-    //       tags.push(tags_split[0]);
-    //       createTag();
-    //     }
-    //   }
-    //   e.target.value = "";
-    // }
-    // input.addEventListener("keyup", findTagsAndFilter);
   </script>
   <!-- MDB -->
   <script

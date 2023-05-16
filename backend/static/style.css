@@ -3,7 +3,7 @@
 }
 
 .input-group {
-  margin: 10px 0px;
+  margin-bottom: 20px;
 }
 
 .pagination .page-link {
@@ -135,12 +135,13 @@
 
 .tags {
   display: inline-block;
+  line-height: 2;
 }
 
 .tag {
   padding: 4px 20px !important;
   margin-left: 10px;
-  margin-bottom: -4px;
+  margin-bottom: 4px;
 }
 
 .hotel-button {

@@ -46,33 +46,6 @@
         </h6>
         <div style="height: 10px"></div>
       </div>
-      <!-- <div class="card-body">
-        <a href="/" style="text-decoration: none;">👈 Back</a>
-        <h1>🏨 {{ name }}</h1>
-        <p>⭐️ <strong>Score</strong>:
-        {% for star_count in range((score // 2) | int) %}
-            <img src="{{ url_for('static', filename='images/full-star.png') }}" width="20px" />
-            {% endfor %}
-
-            {% if ((score | int) % 2) == 1 %}
-            <img src="{{ url_for('static', filename='images/half-star.png') }}" width="20px" />
-            {% endif %}
-
-            {% for star_count in range(5 - ((score // 2) | int) - ((score | int) % 2)) %}
-            <img src="{{ url_for('static', filename='images/empty-star.png') }}" width="20px" />
-            {% endfor %}
-            {{ score }} / 10
-        </p>
-        <p>🗺️ <strong>Country</strong>: {{ country }}</p>
-        <div>
-          <p>
-            🔖 <strong>Tags</strong>: {% for i in range(tags|length) %}
-
-            <span id="t{{i}}" class="tag">{{tags[i]}}</span>
-
-            {% endfor %}
-          </p>
-        </div> -->
       </div>
     <div class="card" style="width: 50vw">
       <div class="card-body">

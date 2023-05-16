@@ -25,6 +25,7 @@ MYSQL_PORT = 3306
 MYSQL_DATABASE = "kardashiandb"
 
 REVIEWS_PER_PAGE = 10
+ALL_TAGS = {'breakfast', 'lovely', 'atmosphere', 'fantastic', 'quiet', 'rooms', 'facilities', 'comfy', 'nice', 'modern', 'decor', 'bed', 'beds', 'service', 'perfect', 'really', 'clean', 'attention', 'professional', 'amazing', 'extra', 'buffet', 'accommodating', 'helpful', 'excellent', 'comfort', 'good', 'stylish', 'decoration', 'beautiful', 'comfortable', 'brilliant', 'positive', 'super', 'bathroom', 'best', 'exceptional', 'design', 'near', 'fabulous', 'price', 'easy', 'champagne', 'loved', 'polite', 'victoria', 'upgraded', 'attentive', 'small', 'spacious', 'cleanliness', 'central', 'food', 'vibe', 'feel', 'ideal', 'boutique', 'view', 'kitchenette', 'size', 'location', 'wonderful', 'friendliness', 'royal', 'style', 'area', 'place', 'great', 'reception', 'du', 'croissants', 'new', 'shower', 'underground', 'executive', 'quirky', 'club', 'thing', 'extremely', 'close', 'property', 'kind', 'large', 'friendly', 'hammam', 'superb', 'rooftop', 'charming', 'definitely', 'personal', 'character', 'pool', 'balcony', 'absolutely', 'money', 'exceptionally', 'hospitality', 'spa', 'cozy', 'brand', 'welcoming', 'lobby', 'cookie', 'bar', 'center', 'convenient', 'outstanding', 'restaurant', 'unique', 'overall', 'roof', 'open', 'located', 'ok', 'just', 'delicious', 'big', 'gym', 'room', 'hotel', 'italy', 'courtyard', 'parking', 'shopping', 'value', 'desk', 'quality', 'pillows', 'suite', 'metro', 'connections', 'paris', 'delightful', 'totally', 'old', 'tea', 'help', 'space', 'pleasant', 'employee', 'nearby', 'lock', 'quietness', 'concierge', 'stuff', 'cocktails', 'business', 'luxury', 'baguette', 'canal', 'afternoon', 'helpfull', 'city', 'home', 'treat', 'stay', 'village', 'wifi', 'position', 'gem', 'street', 'real', 'experience', 'special', 'art', 'besi', 'station', 'seine', 'beautifully', 'interior', 'enjoyed', 'gard', 'windows', 'customer', 'mr', 'like', 'free', 'walk', 'couldn', 'restaurants', 'tower', 'swimming', 'cool', 'booking', 'neighborhood', 'republique', 'brasserie', 'newly', 'nicely', 'quite', 'family', 'liked', 'helpfulness', 'public', '10', 'little', 'relaxing', 'night', 'apartment', 'rambla', 'winery', 'kitchen', 'ambience', 'laundry', 'walking', 'cake', 'duomo', 'patrick', 'upgrade', 'awesome', 'distance', 'cosy', 'access', 'familiar', 'st', 'reasonably', 'arra', 'efficient', 'terrace', 'high', 'building', 'trouble', 'maintained', 'decorated', 'thank', 'love', 'class', 'vosges', 'fun', 'calm', 'marais', 'hall', 'shops', 'time', 'theme', 'alcohol', 'safe', 'world', 'cleaning', 'coffee', 'lines', 'renovated', 'complementary', 'smell', 'espanya', 'garden', 'staffs', 'people', 'furniture', 'incredibly', 'tapas', 'views', 'westbahnhof', 'park', 'highly', 'fab', 'vienna', 'concept', 'aswell', 'attractions', 'happy', 'breakfasts', 'centrally', 'fine', 'received', 'lights', 'lounge', 'cooked', 'radio', 'services', 'glass', 'london', 'preserved', 'especially', 'soho', 'cadet', 'court', 'arrival', 'spot', 'tube', 'discreet', 'albert', 'elegant', 'floor', 'recommend', 'star', 'books', 'welcome', 'bit', 'barbican', 'bedding', 'tasty', 'check', 'amenities', 'bright', 'trip', 'lots', 'continental', 'pleasure', 'dinner', 'warm', 'transport', 'priced', 'centre', 'smart', 'tidy', 'look', 'europe', 'given', 'transportation', 'eurostar', 'pleasantries', 'choice', 'day', 'ticket', 'amsterdam', 'selection', 'train', 'neri', 'bars', 'music', 'milan', 'caring', 'armani', 'lot'}
 
 mysql_engine = MySQLDatabaseHandler(
     MYSQL_USER, MYSQL_USER_PASSWORD, MYSQL_PORT, MYSQL_DATABASE)
@@ -114,12 +115,19 @@ def find_section(text, attr):
             lst.append(i)
     return min(lst), max(lst)
 
-def sql_search(input_search, countries, tags=None):
-    countries_list = countries.split(",")
-    countries_set = set(countries_list)
+def sql_search(input_search, countries, tags):
+    if countries == "":
+        countries_set = {"Italy", "Netherlands", "Spain", "United Kingdom", "France"}
+    else:
+        countries_list = countries.split(",")
+        countries_set = set(countries_list)
 
-    tags_list = tags.split(",")
-    tags_set = set(tags_list)
+    if countries == "":
+        tags_set = ALL_TAGS
+    else:
+        tags_list = tags.split(",")
+        tags_set = set(tags_list)
+        
 
     query = vectorizer.transform([input_search])
     similarities = cosine_similarity(query, tfIdfMatrix)
@@ -243,7 +251,8 @@ def hotel(hotel_id):
 def reviews_search():
     text = request.args.get("query")
     countries = request.args.get("countries")
-    return sql_search(text, countries)
+    tags = request.args.get("tags")
+    return sql_search(text, countries, tags)
 
 @ app.route("/upvote/<int:hotel_id>/", methods=["POST"])
 def upvote(hotel_id):

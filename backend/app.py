@@ -122,7 +122,7 @@ def sql_search(input_search, countries, tags):
         countries_list = countries.split(",")
         countries_set = set(countries_list)
 
-    if countries == "":
+    if tags == "":
         tags_set = ALL_TAGS
     else:
         tags_list = tags.split(",")

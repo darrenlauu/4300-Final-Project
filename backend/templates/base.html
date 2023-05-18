@@ -35,7 +35,7 @@
   <div class="full-body-container">
     <div class="top-text">
       <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" /></a>
-      <div class="card" style="min-width: 30vw">
+      <div class="card" style="min-width: 50vw">
         <div class="card-body">
           <h5>What are you looking for?</h5>
           <div class="input-group">
@@ -125,10 +125,6 @@
               </div>`;
     }
 
-    function sendFocus() {
-      document.getElementById("filter-text-val").focus();
-    }
-
     function filterText() {
       document.getElementById("answer-box").innerHTML = "";
       const selectedCountryOptions = document.querySelectorAll(
@@ -137,14 +133,12 @@
       const selectedTagOptions = document.querySelectorAll(
         ".select-tags-wrapper .select2-selection__choice"
       );
-      // get a list of all selected values
       const countryValues = Array.from(selectedCountryOptions).map(
         (option) => option.textContent.substring(1)
       );
       const tagValues = Array.from(selectedTagOptions).map(
         (option) => option.textContent.substring(1)
       );
-      // join values by comma into string
       const countryString = countryValues.join(",");
       const tagString = tagValues.join(",");
       const query = document.getElementById("search").value;
@@ -183,17 +177,6 @@
             document.getElementById("answer-box").appendChild(tempDiv);
           }
         });
-    }
-  </script>
-  <script>
-    // from https://www.codingnepalweb.com/tags-input-box-html-javascript/
-    const ul = document.querySelector("ul"),
-      input = document.getElementById("filter-text-val");
-    function findTagsAndFilter(e) {
-      if (e.keyCode === 13) {
-        // addTag(e);
-        filterText();
-      } 
     }
   </script>
   <!-- MDB -->
